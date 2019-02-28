@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+. /usr/local/share/container-scripts/adjust-term
+. /usr/local/share/container-scripts/adjust-user local- local-
+
+if [[ $MAP_PWD && $MAP_TOP_DIR ]]; then
+	relative_dir="${MAP_PWD#$MAP_TOP_DIR}"
+	cd "/srv/$relative_dir"
+fi
+
+
+exec gosu "$TARGET_USER" npm "$@"

@@ -1,0 +1,105 @@
+#!/bin/bash
+
+set -e
+
+if [[ -z $TOP_DIR ]]; then
+	echo "TOP_DIR not set"
+	exit 1
+fi
+
+service_name="$1"
+service_program="$2"
+shift 2
+
+space=$' '
+tab=$'\t'
+newline=$'\n'
+cr=$'\r'
+
+# The docker-compose .env file is *not* compatible with shell.  Quotes
+# become part of the variable.  Hence the need for this complex
+# function.
+
+compose_env_has_been_read=
+declare -A compose_envvar
+compose_env_read() {
+	[[ ! -e $1 ]] && return
+	local continuation= line name value
+	while read line; do
+		if [[ $continuation ]]; then
+			if [[ $line =~ '\\'$ ]]; then
+				value+="${line%\\}"
+			else
+				compose_envvar["$name"]="$value$line"
+				continuation=
+			fi
+		else
+			if [[ $line =~ ^[$space$tab]*'#' ]]; then
+				: #comment
+			elif [[ $line =~ ^[$space$tab]*([^=$space$tab]+)'='(.*)$ ]]; then
+				name="${BASH_REMATCH[1]}"
+				value="${BASH_REMATCH[2]}"
+				if [[ $value =~ \\$ ]]; then
+					value="${value%\\}"
+					continuation=1
+				else
+					compose_envvar["$name"]="$value"
+				fi
+			else
+				echo "Can't parse line: $line"
+				exit 1
+			fi
+		fi
+	done < "$1"
+}
+
+compose_env_load() {
+	compose_env_read "$TOP_DIR/.env.defaults"
+	compose_env_read "$TOP_DIR/.env"
+	compose_env_has_been_read=1
+	# redefine the current function, to speed up subsequence runs.
+	compose_env_load() { return; }
+}
+
+if [[ -z $COMPOSE_PROJECT_NAME ]]; then
+	compose_env_load
+	COMPOSE_PROJECT_NAME="${compose_envvar[COMPOSE_PROJECT_NAME]}"
+fi
+if [[ -z $COMPOSE_PROJECT_NAME ]]; then
+	COMPOSE_PROJECT_NAME="${TOP_DIR##*/}"
+	COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME//[_ ]}"
+fi
+export COMPOSE_PROJECT_NAME
+
+container_name="${COMPOSE_PROJECT_NAME}_${service_name}_1"
+
+while :; do
+	status="$(docker container inspect -f '{{.State.Status}}' "$container_name" 2>/dev/null)" || true
+	case "$status" in
+		(running)
+			break
+			;;
+		(exited)
+			docker container start "$container_name"
+			;;
+		('')
+			docker-compose up -d "$service_name"
+			;;
+		(*)
+			echo "Unknown status: $status"
+			exit 1
+			;;
+	esac
+done
+
+t_flag=-t
+tty -s && t_flag="-i -t"
+exec docker exec \
+	-e MAP_TERM="$([[ $TERM ]] && tput cols):$([[ $TERM ]] && tput lines):$TERM" \
+	-e MAP_TOP_DIR="$TOP_DIR" \
+	-e MAP_PWD="$PWD" \
+	-e MAP_USER="$(id)" \
+	-e MAP_UMASK="$(umask)" \
+	$t_flag "$container_name" \
+	/usr/local/share/container-scripts/container-"${service_program}" \
+	"$@"

@@ -1,0 +1,8 @@
+FROM node:8-stretch as app-node
+ARG NPM_VERSION=latest
+RUN true \
+	&& apt-get update \
+	&& apt-get install -y gosu \
+	&& find /var/lib/apt/lists /var/cache/apt/archives -type f -delete \
+	&& npm install -g npm@$NPM_VERSION \
+	&& true

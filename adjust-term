@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ $MAP_TERM =~ ^([0-9]*):([0-9]*):(.*)$ ]]; then
+	export COLUMNS="${BASH_REMATCH[1]}"
+	export LINES="${BASH_REMATCH[2]}"
+	export TERM="${BASH_REMATCH[3]}"
+fi
