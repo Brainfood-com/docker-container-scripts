@@ -1,4 +1,4 @@
-FROM node:8-stretch as app-node
+FROM node:11-stretch as app-node
 ARG NPM_VERSION=latest
 RUN true \
 	&& apt-get update \
