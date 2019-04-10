@@ -1,5 +1,7 @@
 FROM node:11-stretch as app-node
 ARG NPM_VERSION=latest
+
+COPY no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d
 RUN true \
 	&& apt-get update \
 	&& apt-get install -y gosu \

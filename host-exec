@@ -45,6 +45,8 @@ compose_env_read() {
 				else
 					compose_envvar["$name"]="$value"
 				fi
+			elif [[ $line = '' ]]; then
+				:
 			else
 				echo "Can't parse line: $line"
 				exit 1
@@ -83,7 +85,7 @@ while :; do
 			docker container start "$container_name"
 			;;
 		('')
-			docker-compose up -d "$service_name"
+			docker-compose -f "$TOP_DIR/docker-compose.yml" up -d "$service_name"
 			;;
 		(*)
 			echo "Unknown status: $status"
@@ -91,8 +93,7 @@ while :; do
 			;;
 	esac
 done
-
-t_flag=-t
+t_flag=-i
 tty -s && t_flag="-i -t"
 exec docker exec \
 	-e MAP_TERM="$([[ $TERM ]] && tput cols):$([[ $TERM ]] && tput lines):$TERM" \
@@ -101,5 +102,5 @@ exec docker exec \
 	-e MAP_USER="$(id)" \
 	-e MAP_UMASK="$(umask)" \
 	$t_flag "$container_name" \
-	/usr/local/share/container-scripts/container-"${service_program}" \
+	/usr/local/share/container-scripts/container-exec "${service_program}" \
 	"$@"

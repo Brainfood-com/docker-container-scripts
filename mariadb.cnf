@@ -1,0 +1,16 @@
+#[client]
+#default-character-set = utf8mb4
+#
+#[mysql]
+#default-character-set = utf8mb4
+
+[mysqld]
+bind-address = *
+
+#character_set_server=utf8mb4
+#collation_server=utf8mb4_unicode_ci
+
+innodb_file_format=barracuda
+innodb_file_per_table=1
+innodb_large_prefix=1
+

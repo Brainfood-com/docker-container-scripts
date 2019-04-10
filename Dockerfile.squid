@@ -1,0 +1,17 @@
+FROM debian:stretch-slim
+
+EXPOSE 3128
+
+RUN apt-get update \
+	&& DEBIAN_FRONTEND=noninteractive apt-get install -y squid iproute2 \
+	&& apt-get clean \
+	&& mkdir /etc/squid/squid.conf.d \
+	&& find /var/cache/apt /var/lib/apt -type f -delete \
+	&& true
+
+ENV SQUID_cache_dir_size 10240
+#(old) COPY entrypoint /srv/localdev/scripts/entrypoint
+COPY adjust-user adjust-term container-entrypoint container-squid-entrypoint /usr/local/share/container-scripts/
+
+ENTRYPOINT ["/usr/local/share/container-scripts/container-entrypoint", "/usr/local/share/container-scripts/container-squid-entrypoint"]
+CMD ["/usr/sbin/squid", "-NYCd", "1", "-f", "/etc/squid/auto-squid.conf"]

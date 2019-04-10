@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+cmd="$1"
+shift
+
+declare -a locations=(
+	"/usr/local/share/container-scripts"
+	"/srv/app/container-scripts/bin"
+)
+for location in "${locations[@]}"; do
+	if [[ -e $location/$cmd ]]; then
+		exec "$location/$cmd" "$@"
+		exit 1
+	fi
+done
+echo "Could not find script '$cmd'!" 1>&2
+exit 1

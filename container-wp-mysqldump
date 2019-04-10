@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+. /usr/local/share/container-scripts/adjust-term
+
+exec mysqldump \
+	--host="${WORDPRESS_define_DB_HOST}" \
+	--user="${WORDPRESS_define_DB_USER}" \
+	--password="${WORDPRESS_define_DB_PASSWORD}" \
+	"${WORDPRESS_define_DB_NAME}" \
+	"$@"

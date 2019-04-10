@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+. /usr/local/share/container-scripts/adjust-term
+
+exec myloader -S /var/run/mysqld/mysqld.sock -u root "$@"

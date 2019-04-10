@@ -8,4 +8,18 @@ if [[ $CONTAINER_USER && $CONTAINER_GROUP ]]; then
 	/usr/local/share/container-scripts/adjust-user "$CONTAINER_USER" "$CONTAINER_GROUP"
 fi
 
+if [[ -e /container-init.d/* ]]; then
+	for s in /container-init.d/*; do
+		$s
+	done
+fi
+
+if [[ -e /etc/init.d/rsyslog ]]; then
+	/etc/init.d/rsyslog start
+fi
+
+if [[ -e /etc/init.d/ssh ]]; then
+	/etc/init.d/ssh start
+fi
+
 exec "$@"

@@ -1,0 +1,23 @@
+FROM debian:stretch-slim
+
+COPY no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d
+RUN apt-get update \
+	&& apt-get install -y php7.0-cli php7.0-fpm php7.0-curl php7.0-mysql php7.0-gd ssmtp sudo mysql-client \
+	&& find /var/cache/apt /var/lib/apt -type f -delete \
+	&& mkdir -p /run/php \
+	&& true
+
+COPY --from=wordpress:cli /usr/local/bin/wp /usr/local/bin/wp
+COPY php-cli.ini /etc/php5/cli/conf.d/99-docker.conf
+COPY php-fpm-pool-www.conf /etc/php/7.0/fpm/pool.d/zz-www.conf
+#COPY adjust-user adjust-term container-entrypoint container-php-entrypoint /usr/local/share/container-scripts/
+COPY adjust-user adjust-term container-entrypoint /usr/local/share/container/scripts/
+COPY container-php-entrypoint /usr/local/share/container/entrypoint/
+
+ENV CONTAINER_USER www-data
+ENV CONTAINER_GROUP www-data
+
+EXPOSE 9000
+ENTRYPOINT ["/usr/local/share/container-scripts/container-entrypoint", "cntainer-php-entrypoint"]
+CMD ["/usr/sbin/php-fpm7.0", "-F"]
+

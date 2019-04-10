@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+if [[ $(find /var/lib/mysql -maxdepth 1 -mindepth 1 | wc -l) = 0 ]]; then
+	mkdir -p /var/lib/mysql
+	zcat /var/lib/container/var_lib_mysql.tar.gz | tar -C /var/lib/mysql -xf -
+fi
+
+exec "$@"

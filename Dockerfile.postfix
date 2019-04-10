@@ -1,0 +1,19 @@
+FROM debian:stretch-slim
+
+COPY no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d
+RUN apt-get update \
+	&& apt-get install -y bsd-mailx postfix rsyslog \
+	&& addgroup hostgroup \
+	&& adduser --gecos 'Host User' --ingroup hostgroup --disabled-password hostuser \
+	&& find /var/cache/apt /var/lib/apt -type f -delete \
+	&& true
+
+COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
+#COPY adjust-user adjust-term container-entrypoint container-postfix-entrypoint /usr/local/share/container-scripts/
+COPY adjust-user adjust-term container-entrypoint /usr/local/share/container/scripts/
+COPY container-postfix-entrypoint /usr/local/share/container/entrypoint/
+
+EXPOSE 25
+ENTRYPOINT ["/usr/local/share/container/entrypoint", "container-postfix-entrypoint"]
+CMD ["/usr/lib/postfix/sbin/master", "-d"]
+

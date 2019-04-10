@@ -1,0 +1,75 @@
+#!/bin/bash
+
+space=$' '
+tab=$'\t'
+newline=$'\n'
+cr=$'\r'
+
+# The docker-compose .env file is *not* compatible with shell.  Quotes
+# become part of the variable.  Hence the need for this complex
+# function.
+
+declare -A compose_envvar
+compose_env_read() {
+	[[ ! -e $1 ]] && return
+	local continuation= line name value
+	set -x
+	while read line; do
+		if [[ $continuation ]]; then
+			if [[ $line =~ '\\'$ ]]; then
+				value+="${line%\\}"
+			else
+				compose_envvar["$name"]="$value$line"
+				continuation=
+			fi
+		else
+			if [[ $line =~ ^[$space$tab]*'#' ]]; then
+				: #comment
+			elif [[ $line =~ ^[$space$tab]*([^=$space$tab]+)'='(.*)$ ]]; then
+				name="${BASH_REMATCH[1]}"
+				value="${BASH_REMATCH[2]}"
+				if [[ $value =~ \\$ ]]; then
+					value="${value%\\}"
+					continuation=1
+				else
+					compose_envvar["$name"]="$value"
+				fi
+			elif [[ $line = '' ]]; then
+				:
+			else
+				echo "Can't parse line: $line"
+				exit 1
+			fi
+		fi
+	done < "$1"
+}
+
+RANDOM_MATRIX="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+_create_random_value() {
+	local LENGTH VALUE
+	LENGTH="$1"
+	shift
+	VALUE=
+	while [ "${n:=1}" -le "$LENGTH" ]; do
+		VALUE="$VALUE${MATRIX:$(($RANDOM%${#RANDOM_MATRIX})):1}"
+		let n+=1
+	done
+	echo "$VALUE"
+}
+
+_ensure_compose_var_randomly() {
+	local name="$1" length="$2" func="$3" random_value
+	shift 3
+
+	[[ ${compose_envvar[$name]} ]] && return
+	while random_value="$(_create_random_value $length)"; do
+		$func "$random_value" "$@" && break
+	done
+	compose_envvar[$name]="$random_value"
+}
+
+if ! [[ -d $service_directory ]]; then
+	echo "Service directory($service_directory) does not exist!"
+	exit 1
+fi
