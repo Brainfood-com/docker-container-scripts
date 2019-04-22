@@ -2,10 +2,10 @@
 
 set -e
 
-. /usr/local/share/container-scripts/adjust-term
+. /usr/local/share/container/scripts/adjust-term
 
 if [[ $CONTAINER_USER && $CONTAINER_GROUP ]]; then
-	/usr/local/share/container-scripts/adjust-user "$CONTAINER_USER" "$CONTAINER_GROUP"
+	/usr/local/share/container/scripts/adjust-user "$CONTAINER_USER" "$CONTAINER_GROUP"
 fi
 
 if [[ -e /container-init.d/* ]]; then

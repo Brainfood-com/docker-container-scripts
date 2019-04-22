@@ -11,7 +11,8 @@ RUN apt-get update \
 
 ENV SQUID_cache_dir_size 10240
 #(old) COPY entrypoint /srv/localdev/scripts/entrypoint
-COPY adjust-user adjust-term container-entrypoint container-squid-entrypoint /usr/local/share/container-scripts/
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY entrypoint/squid /usr/local/share/container/entrypoint/
 
-ENTRYPOINT ["/usr/local/share/container-scripts/container-entrypoint", "/usr/local/share/container-scripts/container-squid-entrypoint"]
+ENTRYPOINT ["/usr/local/share/container-scripts/entrypoint", "squid"]
 CMD ["/usr/sbin/squid", "-NYCd", "1", "-f", "/etc/squid/auto-squid.conf"]

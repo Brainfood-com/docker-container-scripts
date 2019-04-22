@@ -6,7 +6,7 @@ cmd="$1"
 shift
 
 declare -a locations=(
-	"/usr/local/share/container-scripts"
+	"/usr/local/share/container/bin"
 	"/srv/app/container-scripts/bin"
 )
 for location in "${locations[@]}"; do

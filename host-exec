@@ -102,5 +102,5 @@ exec docker exec \
 	-e MAP_USER="$(id)" \
 	-e MAP_UMASK="$(umask)" \
 	$t_flag "$container_name" \
-	/usr/local/share/container-scripts/container-exec "${service_program}" \
+	/usr/local/share/container/scripts/exec "${service_program}" \
 	"$@"

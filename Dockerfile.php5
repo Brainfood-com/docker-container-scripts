@@ -10,8 +10,9 @@ RUN apt-get update \
 COPY --from=wordpress:cli /usr/local/bin/wp /usr/local/bin/wp
 COPY etc/php5/cli/conf.d/php-cli.ini /etc/php5/cli/conf.d/99-docker.conf
 COPY php-fpm-pool-www.conf /etc/php5/fpm/pool.d/zz-www.conf
-COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint /usr/local/share/container/scripts/
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY entrypoint/php /usr/local/share/container/entrypoint/
+COPY bin/wp /usr/local/share/container/bin/
 
 ENV CONTAINER_USER www-data
 ENV CONTAINER_GROUP www-data
