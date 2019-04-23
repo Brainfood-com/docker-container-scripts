@@ -1,0 +1,65 @@
+version: '3.4'
+
+x-logging: &_logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "10"
+
+networks:
+  default:
+  http-proxy:
+    external:
+      name: http-proxy
+  nginx:
+    external:
+      name: nginx
+
+volumes:
+  nexus-data:
+
+services:
+  nexus:
+    build:
+      context: .
+      dockerfile: Dockerfile.nexus3
+    image: bf-nexus3
+    logging:
+      <<: *_logging
+    volumes:
+      - nexus-data:/nexus-data
+    restart: always
+
+  nexus-nginx:
+    build:
+      args:
+#        - http_proxy=http://http-proxy:3189/
+        - NGINX_UPGRADE=1
+      context: .
+      dockerfile: Dockerfile.nginx
+#      network: http-proxy
+    depends_on:
+      - nexus
+    environment:
+      - CERT_NAME=${VHOST_NEXUS_CERT_NAME}
+#      - LETSENCRYPT_VHOST=docker-registry.${VHOST_NEXUS_SUFFIX},docker-nexus.${VHOST_NEXUS_SUFFIX}
+#      - LETSENCRYPT_EMAIL=${VHOST_LETSENCRYPT_EMAIL}
+      - VIRTUAL_HOST=docker-registry-mirror.${VHOST_NEXUS_SUFFIX},docker-registry.${VHOST_NEXUS_SUFFIX},nexus.${VHOST_NEXUS_SUFFIX},maven-mirror.${VHOST_NEXUS_SUFFIX}
+      - HTTPS_METHOD=noredirect
+    image: bf-nexus3-nginx
+    logging:
+      <<: *_logging
+    networks:
+      default:
+      http-proxy:
+        aliases:
+          - docker-registry-mirror
+          - docker-registry
+          - maven-mirror
+          - npm-registry
+          - npm-proxy
+      nginx:
+    restart: always
+    volumes:
+      - ./etc/nginx-nexus3/conf.d/:/etc/nginx/conf.d/:ro
+

@@ -1,0 +1,19 @@
+FROM debian:stretch-slim
+
+ARG NGINX_UPGRADE
+
+EXPOSE 80 443
+
+RUN apt-get update \
+	&& apt-get install -y nginx \
+	&& ln -sf /dev/stdout /var/log/nginx/access.log \
+	&& ln -sf /dev/stderr /var/log/nginx/error.log \
+	&& find /var/cache/apt /var/lib/apt -type f -delete \
+	&& true
+
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY healthcheck/nginx /usr/local/share/container/healthcheck/
+HEALTHCHECK --interval=15s CMD ["/usr/local/share/container/healthcheck/nginx"]
+
+ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
+CMD ["nginx", "-g", "daemon off;"]

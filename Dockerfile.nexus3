@@ -1,0 +1,6 @@
+FROM sonatype/nexus3
+
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY healthcheck/nexus3 /usr/local/share/container/healthcheck/
+
+HEALTHCHECK --interval=15s CMD ["/usr/local/share/container/healthcheck/nexus3"]
