@@ -13,6 +13,8 @@ RUN apt-get update \
 
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY healthcheck/nginx /usr/local/share/container/healthcheck/
+COPY etc/nginx/conf.d/00-increase-client-max-body-size.conf /etc/nginx/conf.d/00-increase-client-max-body-size.conf
+COPY etc/nginx/conf.d/00-increase-server-names-hash-bucket-size.conf /etc/nginx/conf.d/00-increase-server-names-hash-bucket-size.conf
 HEALTHCHECK --interval=15s CMD ["/usr/local/share/container/healthcheck/nginx"]
 
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
