@@ -1,0 +1,66 @@
+#!/bin/bash
+
+set -e
+
+TARGET_USER=java
+TARGET_GROUP=java
+
+target_home="$(getent passwd "$TARGET_USER" | cut -f 6 -d :)"
+
+if [[ $GID && $GID -ne 0 ]]; then
+	groupmod -g $GID "$TARGET_GROUP"
+fi
+if [[ $UID && $UID -ne 0 ]]; then
+	usermod -u $UID "$TARGET_USER"
+fi
+
+if [[ $http_proxy =~ ^([^:]+)://([^/:]*)(:([0-9]+?))?(/.*)?$ ]]; then
+	http_proxy_protocol="${BASH_REMATCH[1]}"
+	http_proxy_domain="${BASH_REMATCH[2]}"
+	http_proxy_port="${BASH_REMATCH[4]}"
+fi
+
+if [[ $http_proxy ]]; then
+	mkdir -p "$target_home/.m2"
+	cat > "$target_home/.m2/settings.xml" << _EOF_
+<settings>
+  <proxies>
+   <proxy>
+      <id>app-build-proxy</id>
+      <active>true</active>
+      <protocol>${http_proxy_protocol}</protocol>
+      <host>${http_proxy_domain}</host>
+      <port>${http_proxy_port}</port>
+    </proxy>
+  </proxies>
+</settings>
+_EOF_
+	mkdir -p "$target_home/.gradle"
+	cat > "$target_home/.gradle/gradle.properties" << _EOF_
+systemProp.http.proxyHost=${http_proxy_domain}
+systemProp.http.proxyPort=${http_proxy_port}
+#systemProp.http.proxyUser=de\\username
+#systemProp.http.proxyPassword=xxx
+_EOF_
+	mkdir -p "$target_home/.gradle/init.d"
+	cat > "$target_home/.gradle/init.d/nexus.gradle" << _EOF_
+allprojects {
+  repositories {
+     maven {
+        url "http://maven-mirror/maven-public"
+     }
+     jcenter {
+        url "http://maven-mirror/repository/jcenter"
+     }
+  }
+}
+_EOF_
+fi
+
+find "$target_home" \
+	'(' -not -user "$TARGET_USER" -a -not -group "$TARGET_GROUP" -exec chown "$TARGET_USER:$TARGET_GROUP" '{}' + ')' -o \
+	'(' -not -user "$TARGET_USER" -exec chown "$TARGET_USER" '{}' + ')' -o \
+	'(' -not -group "$TARGET_GROUP" -exec chgrp "$TARGET_GROUP" '{}' + ')' -o \
+	-true
+
+exec "$@"

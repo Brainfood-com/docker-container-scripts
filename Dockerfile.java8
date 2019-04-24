@@ -1,0 +1,22 @@
+FROM debian:stretch-slim
+
+ARG JAVA_EXTRA_PACKAGES
+
+COPY no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d
+
+RUN true \
+	&& mkdir -p /usr/share/man/man1 \
+	&& apt-get update \
+	&& apt-get install -y ssmtp gosu sudo openjdk-8-jdk libpg-java $JAVA_EXTRA_PACKAGES \
+	&& addgroup java \
+	&& adduser --gecos 'java' --ingroup java --disabled-password java \
+	&& true
+
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY entrypoint/java /usr/local/share/container/entrypoint/
+COPY bin/local-user bin/container-user usr/local/share/container/bin/
+
+ENV CONTAINER_USER java
+ENV CONTAINER_GROUP java
+
+ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/java"]
