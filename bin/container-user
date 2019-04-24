@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+. /usr/local/share/container/scripts/adjust-term
+
+if [[ -d /srv/app && $MAP_PWD && $MAP_TOP_DIR ]]; then
+	relative_dir="${MAP_PWD#$MAP_TOP_DIR}"
+	cd "/srv/app$relative_dir"
+fi
+
+exec gosu "$CONTAINER_USER" "$@"
