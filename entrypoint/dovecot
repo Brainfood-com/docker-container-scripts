@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+if [[ $DOVECOT_HOSTUSER_PASSWORD ]]; then
+	echo "hostuser:$DOVECOT_HOSTUSER_PASSWORD" | chpasswd
+fi
+
+exec "$@"
