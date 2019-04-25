@@ -85,7 +85,11 @@ while :; do
 			docker container start "$container_name"
 			;;
 		('')
-			docker-compose -f "$TOP_DIR/docker-compose.yml" up -d "$service_name"
+			if [[ -f $TOP_DIR/docker-compose.yml ]]; then
+				docker-compose -f "$TOP_DIR/docker-compose.yml" up -d "$service_name"
+			else
+				docker-compose -f "$TOP_DIR/docker-compose.yaml" up -d "$service_name"
+			fi
 			;;
 		(*)
 			echo "Unknown status: $status"
