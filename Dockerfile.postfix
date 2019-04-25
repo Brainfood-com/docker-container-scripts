@@ -1,6 +1,6 @@
 FROM debian:stretch-slim
 
-COPY no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d
+COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 RUN apt-get update \
 	&& apt-get install -y bsd-mailx postfix rsyslog \
 	&& addgroup hostgroup \

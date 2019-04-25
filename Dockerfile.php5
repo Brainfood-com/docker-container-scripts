@@ -1,6 +1,6 @@
 FROM debian:jessie-slim
 
-COPY no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d
+COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 RUN apt-get update \
 	&& apt-get install -y php5-cli php5-fpm php5-curl php5-mysql php5-gd ssmtp sudo less mysql-client \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
