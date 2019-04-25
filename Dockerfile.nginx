@@ -4,8 +4,10 @@ ARG NGINX_UPGRADE
 
 EXPOSE 80 443
 
+COPY etc/apt/sources.list.d/stretch-backports.list etc/apt/sources.list.d/stretch-backports.list
+
 RUN apt-get update \
-	&& apt-get install -y nginx \
+	&& apt-get install -t stretch-backports -y nginx \
 	&& ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log \
 	&& rm /etc/nginx/sites-enabled/default \
