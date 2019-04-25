@@ -8,6 +8,7 @@ RUN apt-get update \
 	&& apt-get install -y nginx \
 	&& ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log \
+	&& rm /etc/nginx/sites-enabled/default \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
