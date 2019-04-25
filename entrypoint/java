@@ -2,17 +2,7 @@
 
 set -e
 
-TARGET_USER=java
-TARGET_GROUP=java
-
-target_home="$(getent passwd "$TARGET_USER" | cut -f 6 -d :)"
-
-if [[ $GID && $GID -ne 0 ]]; then
-	groupmod -g $GID "$TARGET_GROUP"
-fi
-if [[ $UID && $UID -ne 0 ]]; then
-	usermod -u $UID "$TARGET_USER"
-fi
+target_home="$(getent passwd "$CONTAINER_USER" | cut -f 6 -d :)"
 
 if [[ $http_proxy =~ ^([^:]+)://([^/:]*)(:([0-9]+?))?(/.*)?$ ]]; then
 	http_proxy_protocol="${BASH_REMATCH[1]}"
@@ -42,25 +32,26 @@ systemProp.http.proxyPort=${http_proxy_port}
 #systemProp.http.proxyUser=de\\username
 #systemProp.http.proxyPassword=xxx
 _EOF_
+fi
+
+if [[ $LOCALDEV_NEXUS ]]; then
 	mkdir -p "$target_home/.gradle/init.d"
 	cat > "$target_home/.gradle/init.d/nexus.gradle" << _EOF_
 allprojects {
   repositories {
      maven {
-        url "http://maven-mirror/maven-public"
+        url "http://${LOCALDEV_NEXUS}/maven-public"
      }
      jcenter {
-        url "http://maven-mirror/repository/jcenter"
+        url "http://${LOCALDEV_NEXUS}/repository/jcenter"
      }
   }
 }
 _EOF_
 fi
 
-find "$target_home" \
-	'(' -not -user "$TARGET_USER" -a -not -group "$TARGET_GROUP" -exec chown "$TARGET_USER:$TARGET_GROUP" '{}' + ')' -o \
-	'(' -not -user "$TARGET_USER" -exec chown "$TARGET_USER" '{}' + ')' -o \
-	'(' -not -group "$TARGET_GROUP" -exec chgrp "$TARGET_GROUP" '{}' + ')' -o \
-	-true
+# This has already been run once, but since new files have been created
+# in $HOME, the permissions need to be fixed.
+/usr/local/share/container/scripts/adjust-user "$CONTAINER_USER" "$CONTAINER_GROUP"
 
 exec "$@"
