@@ -34,16 +34,16 @@ systemProp.http.proxyPort=${http_proxy_port}
 _EOF_
 fi
 
-if [[ $LOCALDEV_NEXUS ]]; then
+if [[ $HOSTING_NEXUS ]]; then
 	mkdir -p "$target_home/.gradle/init.d"
 	cat > "$target_home/.gradle/init.d/nexus.gradle" << _EOF_
 allprojects {
   repositories {
      maven {
-        url "http://${LOCALDEV_NEXUS}/maven-public"
+        url "http://${HOSTING_NEXUS}/maven-public"
      }
      jcenter {
-        url "http://${LOCALDEV_NEXUS}/repository/jcenter"
+        url "http://${HOSTING_NEXUS}/repository/jcenter"
      }
   }
 }
