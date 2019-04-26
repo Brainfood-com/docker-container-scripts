@@ -5,7 +5,7 @@ HEALTHCHECK CMD ["su", "postgres", "-c", "psql -c 'select 1;'"]
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 RUN apt-get update \
-        && apt-get install --no-install-suggests --no-install-recommends -y less gosu postgresql-10-postgis-2.4 postgresql-10-postgis-2.4-scripts postgresql-10-pgrouting\
+        && apt-get install --no-install-suggests --no-install-recommends -y less gosu postgresql-10-postgis-2.4 postgresql-10-postgis-2.4-scripts postgresql-10-pgrouting libpostgresql-jdbc-java \
         && find /var/lib/apt/lists /var/cache/apt/archives -type f -delete \
         && true
 
