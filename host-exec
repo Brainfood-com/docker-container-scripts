@@ -75,6 +75,30 @@ export COMPOSE_PROJECT_NAME
 
 container_name="${COMPOSE_PROJECT_NAME}_${service_name}_1"
 
+run_compose() {
+	docker-compose -f "$1" up -d "$service_name"
+	# TODO: implement wait for healthcheck
+}
+
+start_compose_service() {
+	declare file
+	for file in docker-compose.yml docker-compose.yaml; do
+		if [[ -f $TOP_DIR/$file ]]; then
+			run_compose "$TOP_DIR/$file"
+			return
+		fi
+	done
+	for file in docker-compose.localdev.yml docker-compose.production.yml; do
+		if [[ -f $TOP_DIR/$file ]]; then
+			ln -sf "$file" "$TOP_DIR/docker-compose.yml"
+			run_compose "$TOP_DIR/docker-compose.yml"
+			return
+		fi
+	done
+	echo "Could not find docker-compose.yml!" 1>&2
+	exit 1
+}
+
 while :; do
 	status="$(docker container inspect -f '{{.State.Status}}' "$container_name" 2>/dev/null)" || true
 	case "$status" in
@@ -85,11 +109,7 @@ while :; do
 			docker container start "$container_name"
 			;;
 		('')
-			if [[ -f $TOP_DIR/docker-compose.yml ]]; then
-				docker-compose -f "$TOP_DIR/docker-compose.yml" up -d "$service_name"
-			else
-				docker-compose -f "$TOP_DIR/docker-compose.yaml" up -d "$service_name"
-			fi
+			start_compose_service
 			;;
 		(*)
 			echo "Unknown status: $status"
