@@ -1,0 +1,16 @@
+#!/usr/bin/node
+
+import net from 'net'
+
+const port = node.process.argv[0]
+
+const client = net.createConnection({allowHalfOpen: true, port, host: 'localhost'})
+client.on('connect', () => {
+  process.exit(0)
+})
+client.on('error', () => {
+  process.exit(1)
+}}
+client.on('timeout', () => {
+  process.exit(1)
+})
