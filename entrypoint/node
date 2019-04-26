@@ -4,7 +4,18 @@
 # feature it currently supports is the use of a local mirror
 # repository.
 
-if [[ -x $(which npm) && $HOSTING_NEXUS ]]; then
-	npm config -g set registry http://${HOSTING_NEXUS}/repository/npm-group
+set -x
+if [[ $(which npm) ]]; then
+	if [[ $HOSTING_NEXUS ]]; then
+		npm config -g set registry http://${HOSTING_NEXUS}/repository/npm-group
+	fi
+	if [[ -e package.json ]]; then
+		if [[ $NPM_AUTO_INSTALL ]]; then
+			gosu $CONTAINER_USER npm install
+		fi
+		if [[ $NPM_AUTO_RUN ]]; then
+			gosu $CONTAINER_USER npm run "$NPM_AUTO_RUN"
+		fi
+	fi
 fi
 exec "$@"
