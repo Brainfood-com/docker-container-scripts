@@ -9,6 +9,7 @@ if [[ $(which npm) ]]; then
 	if [[ $HOSTING_NEXUS ]]; then
 		npm config -g set registry http://${HOSTING_NEXUS}/repository/npm-group
 	fi
+	gosu $CONTAINER_USER npm config set prefix /home/node/.npm-prefix
 	if [[ -e package.json ]]; then
 		if [[ $NPM_AUTO_INSTALL ]]; then
 			gosu $CONTAINER_USER npm install
