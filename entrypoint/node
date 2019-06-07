@@ -19,4 +19,7 @@ if [[ $(which npm) ]]; then
 		fi
 	fi
 fi
+
+ulimit -n 8192
+
 exec "$@"
