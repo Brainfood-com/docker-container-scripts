@@ -18,5 +18,5 @@ ENV CONTAINER_USER www-data
 ENV CONTAINER_GROUP www-data
 
 EXPOSE 9000
-ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "php"]
+ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
 CMD ["/usr/sbin/php5-fpm", "-F"]
