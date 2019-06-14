@@ -1,0 +1,92 @@
+version: '3.4'
+
+x-logging: &_logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "10"
+
+x-postfix: &_postfix-base
+
+networks:
+  default:
+  mail:
+    external:
+      name: mail-dev
+  build:
+    external:
+      name: build
+  nginx:
+    external:
+      name: nginx
+
+volumes:
+  home:
+
+services:
+  roundcube:
+    build:
+      args:
+        - http_proxy
+      context: ../..
+      dockerfile: Dockerfile.roundcube
+      network: build
+    environment:
+      VIRTUAL_HOST: mail${HOSTING_VHOST_SUFFIX}
+    image: bf-roundcube
+    logging:
+      <<: *_logging
+    networks:
+      default:
+      nginx:
+    restart: always
+
+  dovecot:
+    build:
+      args:
+        - http_proxy
+      context: ../..
+      dockerfile: Dockerfile.dovecot
+      network: build
+    domainname: localdev
+    environment:
+      - DOVECOT_HOSTUSER_PASSWORD
+    image: bf-dovecot
+    logging:
+      <<: *_logging
+    networks:
+      default:
+        aliases:
+          - imap
+    restart: always
+    volumes:
+      - type: volume
+        source: home
+        target: /home
+        volume:
+          nocopy: false
+
+  postfix:
+    build:
+      args:
+        - http_proxy
+      context: ../..
+      dockerfile: Dockerfile.postfix
+      network: build
+    cap_add:
+      - SYS_PTRACE
+    domainname: localdev
+    environment:
+      POSTFIX_CATCHALL: 'true'
+    image: bf-postfix
+    logging:
+      <<: *_logging
+    networks:
+      mail:
+        aliases:
+          - smtp
+          - mail # for ssmtp
+    restart: always
+    volumes:
+      - home:/home
+

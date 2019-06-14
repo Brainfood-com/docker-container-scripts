@@ -1,0 +1,35 @@
+version: '3.4'
+
+x-logging: &_logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "10"
+
+networks:
+  build:
+    external:
+      name: build
+
+volumes:
+  squid-data:
+
+services:
+  squid:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.squid
+    environment:
+      SQUID_maximum_object_size: 1 GB
+    image: bf-squid
+    logging:
+      <<: *_logging
+    networks:
+      build:
+        aliases:
+          - http-proxy
+    volumes:
+      - squid-data:/var/spool/squid
+    restart: always
+
+

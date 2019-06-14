@@ -1,0 +1,45 @@
+version: '3.4'
+
+x-logging: &_logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "10"
+
+networks:
+  default:
+  mail:
+    external:
+      name: mail-prod
+  build:
+    external:
+      name: build
+
+volumes:
+  home:
+
+services:
+  postfix:
+    build:
+      args:
+        - http_proxy
+      context: ../..
+      dockerfile: Dockerfile.postfix
+      network: build
+    cap_add:
+      - SYS_PTRACE
+    domainname: localdev
+#    environment:
+#      POSTFIX_CATCHALL: 'true'
+    image: bf-postfix
+    logging:
+      <<: *_logging
+    networks:
+      mail:
+        aliases:
+          - smtp
+          - mail # for ssmtp
+    restart: always
+    volumes:
+      - home:/home
+
