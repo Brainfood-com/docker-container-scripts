@@ -1,3 +1,6 @@
+ARG WP_CLI_IMAGE=wordpress:cli
+FROM $WP_CLI_IMAGE as cli
+
 FROM debian:stretch-slim
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
@@ -7,7 +10,7 @@ RUN apt-get update \
 	&& mkdir -p /run/php \
 	&& true
 
-COPY --from=wordpress:cli /usr/local/bin/wp /usr/local/bin/wp
+COPY --from=cli /usr/local/bin/wp /usr/local/bin/wp
 COPY php-cli.ini /etc/php5/cli/conf.d/99-docker.conf
 COPY php-fpm-pool-www.conf /etc/php/7.0/fpm/pool.d/zz-www.conf
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
