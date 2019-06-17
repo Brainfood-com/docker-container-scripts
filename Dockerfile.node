@@ -1,4 +1,5 @@
-FROM node:11-stretch
+ARG NODE_IMAGE=node:11-stretch
+FROM $NODE_IMAGE
 ARG NPM_VERSION=latest
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
