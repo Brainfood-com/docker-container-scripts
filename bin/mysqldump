@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+. /usr/local/share/container/scripts/adjust-term
+
+exec mysqldump -S /var/run/mysqld/mysqld.sock -u root "$@"
