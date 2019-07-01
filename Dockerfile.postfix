@@ -14,6 +14,6 @@ COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /us
 COPY entrypoint/postfix /usr/local/share/container/entrypoint/
 
 EXPOSE 25
-ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "postfix"]
+ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/postfix"]
 CMD ["/usr/lib/postfix/sbin/master", "-d"]
 
