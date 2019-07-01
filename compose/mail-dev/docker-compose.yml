@@ -32,6 +32,7 @@ services:
       dockerfile: Dockerfile.roundcube
       network: build
     environment:
+      CERT_NAME: ${HOSTING_VHOST_CERT_NAME}
       VIRTUAL_HOST: mail${HOSTING_VHOST_SUFFIX}
     image: bf-roundcube
     logging:
