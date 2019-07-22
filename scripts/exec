@@ -5,6 +5,14 @@ set -e
 cmd="$1"
 shift
 
+if [[ $cmd =~ ^/ ]]; then
+	if [[ -x $cmd ]]; then
+		exec "$cmd" "$@"
+		exit 1
+	fi
+	echo "$cmd is not found or not executable" 1>&2
+	exit 1
+fi
 declare -a locations=(
 	"/usr/local/share/container/bin"
 	"/srv/app/container-scripts/bin"

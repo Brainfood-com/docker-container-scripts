@@ -1,18 +1,57 @@
+FROM debian:stretch-slim AS bup-build
+
+ARG BUP_VERSION=0.29.2
+ADD https://github.com/bup/bup/archive/${BUP_VERSION}.tar.gz /usr/src/bup-${BUP_VERSION}.tar.gz
+
+RUN true \
+	&& apt-get update \
+	&& apt-get install -y \
+		build-essential git pandoc \
+		python2.7-dev python-fuse \
+		python-pyxattr python-pylibacl \
+		linux-libc-dev \
+		acl attr \
+		python-tornado \
+	&& tar -C /usr/src -zxf /usr/src/bup-${BUP_VERSION}.tar.gz \
+	&& cd /usr/src/bup-${BUP_VERSION} \
+	&& make \
+	&& make install DESTDIR=/srv/bup \
+	&& find /srv/bup -type f -print0|xargs -0 ls -l \
+	&& true
+
 FROM debian:stretch-slim
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
+COPY etc/apt/sources.list.d/stretch-backports.list /etc/apt/sources.list.d/
 RUN true \
 	&& apt-get update \
-	&& apt-get install -y rsync openssh-server openssh-client ssmtp sudo rsyslog procps git gosu mydumper mycli mysql-client\
+	&& apt-get install -y rsync openssh-server openssh-client ssmtp sudo rsyslog procps git gosu mydumper mycli mysql-client duplicity gnupg bup \
+	&& apt-get install -y -t stretch-backports git-annex \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
+	&& true
+
+ENV CONTAINER_USER file-access
+ENV CONTAINER_GROUP file-access
+RUN true \
+	&& addgroup file-access \
+	&& adduser --gecos file-access --ingroup file-access --disabled-password file-access \
+	&& chown -R file-access:file-access /home/file-access \
+	&& true
+
+COPY home/file-access/.ssh/ home/file-access/.ssh/
+COPY etc/sudoers.d/file-access etc/sudoers.d/file-access
+RUN true \
+	&& cd /home/file-access \
+	&& chown -R file-access:file-access /home/file-access \
+	&& gosu file-access ssh-keygen -N '' -t rsa -f .ssh/id_rsa \
+	&& gosu file-access sh -c 'cat .ssh/id_rsa.pub >> .ssh/authorized_keys' \
 	&& true
 
 # && apt-get install -y rsync openssh-server openssh-client ssmtp sudo rsyslog libnss-db
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
-
-#ENV CONTAINER_USER www-data
-#ENV CONTAINER_GROUP www-data
+COPY bin/container-user bin/local-user /usr/local/share/container/bin/
+COPY --from=bup-build /srv/bup/ /
 
 #EXPOSE 9000
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
