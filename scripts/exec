@@ -23,5 +23,9 @@ for location in "${locations[@]}"; do
 		exit 1
 	fi
 done
+if which "$cmd" >/dev/null; then
+	exec "$cmd" "$@"
+	exit 1
+fi
 echo "Could not find script '$cmd'!" 1>&2
 exit 1
