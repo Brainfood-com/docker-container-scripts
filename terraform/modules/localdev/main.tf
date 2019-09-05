@@ -68,7 +68,7 @@ module "apt-install-packages" {
 module "docker-network" {
 	source = "../docker-network"
 	connection = var.connection
-	networks = ["build", var.nginx ? "nginx" : "", var.mail-dev ? "mail-dev" : "", var.mail-prod ? "mail-prod" : ""]
+	networks = compact(["build", var.nginx ? "nginx" : "", var.mail-dev ? "mail-dev" : "", var.mail-prod ? "mail-prod" : ""])
 	wait_for = concat(var.wait_for, [
 		module.docker-ce.depended_on,
 	])
