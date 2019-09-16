@@ -11,6 +11,7 @@ RUN apt-get update \
 	&& ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log \
 	&& rm /etc/nginx/sites-enabled/default \
+	&& sed -e 's/\(ssl_protocols\|ssl_prefer_server_ciphers\)/#\1/' -i /etc/nginx/nginx.conf \
 	&& mkdir /etc/nginx/modules.d \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
