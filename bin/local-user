@@ -9,4 +9,4 @@ if [[ -d /srv/app && $MAP_PWD && $MAP_TOP_DIR ]]; then
 	cd "/srv/app$relative_dir"
 fi
 
-exec gosu "$TARGET_USER" "$@"
+exec gosu "$TARGET_USER" /usr/local/share/container/scripts/exec "$@"

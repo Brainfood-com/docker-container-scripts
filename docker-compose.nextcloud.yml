@@ -1,0 +1,81 @@
+version: '3.4'
+
+x-logging: &_logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "10"
+
+networks:
+  default:
+  nginx:
+    external:
+      name: nginx
+
+volumes:
+  nextcloud:
+  postgresql:
+
+services:
+  nextcloud:
+    build:
+      context: .
+      dockerfile: Dockerfile.nextcloud
+    image: bf-nextcloud
+    logging:
+      <<: *_logging
+    volumes:
+      - nextcloud:/var/www/html
+    restart: always
+
+  nextcloud-nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+#      network: http-proxy
+    depends_on:
+      - nextcloud
+    environment:
+      - CERT_NAME=${VHOST_NEXTCLOUD_CERT_NAME}
+#      - LETSENCRYPT_VHOST=docker-registry.${VHOST_NEXUS_SUFFIX},docker-nexus.${VHOST_NEXUS_SUFFIX}
+#      - LETSENCRYPT_EMAIL=${VHOST_LETSENCRYPT_EMAIL}
+      - VIRTUAL_HOST=nextcloud.${VHOST_NEXTCLOUD_SUFFIX}
+      - HTTPS_METHOD=noredirect
+    image: bf-nextcloud-nginx
+    logging:
+      <<: *_logging
+    networks:
+      default:
+      nginx:
+    restart: always
+    volumes:
+    volumes:
+      - type: volume
+        source: nextcloud
+        target: /var/www/html
+        volume:
+          nocopy: false
+      - ./etc/nginx-nextcloud/conf.d/:/etc/nginx/conf.d/:ro
+
+  postgresql:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgresql
+    command: [
+      "postgres",
+      "-c", "fsync=off",
+      "-c", "random_page_cost=1",
+      "-c", "synchronous_commit=off",
+      "-c", "commit_delay=100000",
+      "-c", "wal_writer_delay=10000ms",
+      "-c", "wal_buffers=1MB",
+      ]
+    environment:
+      MAP_USER:
+      PGDATA: /var/lib/postgresql/data
+    image: bf-postgresql
+    logging:
+      <<: *_logging
+    volumes:
+      - ./etc/nextcloud/postgresql-docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+
