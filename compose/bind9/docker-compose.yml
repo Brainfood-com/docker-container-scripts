@@ -1,0 +1,58 @@
+version: '3.4'
+
+x-logging: &_logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "10"
+
+networks:
+  default:
+
+volumes:
+  bind9-etc:
+
+services:
+  bind9:
+    build:
+      args:
+        - http_proxy
+      context: ../..
+      dockerfile: Dockerfile.bind9
+      network: build
+    environment:
+      MAP_USER:
+    image: bf-bind9
+    logging:
+      <<: *_logging
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    restart: always
+    volumes:
+      - type: volume
+        source: bind9-etc
+        target: /etc/bind
+        volume:
+          nocopy: false
+
+  file-access:
+    build:
+      args:
+        - http_proxy
+      context: ../..
+      dockerfile: Dockerfile.file-access
+      network: build
+    depends_on:
+      - bind9
+    environment:
+      MAP_USER:
+      BACKUP_1_LOCATION: /srv/app/volumes/bind9-etc
+      BACKUP_1_FREQUENCY: daily
+      BACKUP_1_METHOD: duplicity
+    image: bf-file-access
+    logging:
+      <<: *_logging
+    restart: always
+    volumes:
+      - bind9-etc:/srv/app/volumes/bind9-etc
