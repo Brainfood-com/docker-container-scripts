@@ -1,22 +1,24 @@
 FROM debian:buster-slim
 
-EXPOSE 80 443
-
 #COPY etc/apt/sources.list.d/stretch-backports.list etc/apt/sources.list.d/stretch-backports.list
 
 RUN apt-get update \
-	&& apt-get install -y bind9 \
+	&& apt-get install -y bind9 gosu \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY entrypoint/bind9 /usr/local/share/container/entrypoint/
+COPY bin/container-user bin/local-user /usr/local/share/container/bin/
 #COPY healthcheck/nginx /usr/local/share/container/healthcheck/
 #COPY etc/nginx/conf.d/00-increase-client-max-body-size.conf /etc/nginx/conf.d/00-increase-client-max-body-size.conf
 #COPY etc/nginx/modules-enabled/99-docker-modules.conf /etc/nginx/modules-enabled/99-docker-modules.conf
 #HEALTHCHECK --interval=15s CMD ["/usr/local/share/container/healthcheck/nginx"]
 
-ENV CONTAINER_USER bind
-ENV CONTAINER_GROUP bind
+EXPOSE 53/tcp 53/udp
 
-ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
+#ENV CONTAINER_USER bind
+#ENV CONTAINER_GROUP bind
+
+ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/bind9"]
 CMD ["/usr/sbin/named", "-u", "bind", "-g"]

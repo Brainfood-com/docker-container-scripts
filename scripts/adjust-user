@@ -86,8 +86,12 @@ if [[ ${map_user[uid]} && ${map_user[uid]} -ne 0 ]]; then
 	[[ ${target_user[uid]} -ne ${map_user[uid]} ]] && usermod -u ${map_user[uid]} "$TARGET_USER"
 fi
 
-if [[ -d ${target_user[home]} ]]; then
-	find "${target_user[home]}" \
+declare -a target_dirs
+[[ -d ${target_user[home]} ]] && target_dirs+=("${target_user[home]}")
+target_dirs+=("$@")
+
+if [[ ${#target_dirs[*]} -gt 0 ]]; then
+	find "${target_dirs[@]}" \
 		'(' -not -user "$TARGET_USER" -a -not -group "$TARGET_GROUP" -exec chown "$TARGET_USER:$TARGET_GROUP" '{}' + ')' -o \
 		'(' -not -user "$TARGET_USER" -exec chown "$TARGET_USER" '{}' + ')' -o \
 		'(' -not -group "$TARGET_GROUP" -exec chgrp "$TARGET_GROUP" '{}' + ')' -o \
