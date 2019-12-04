@@ -1,6 +1,4 @@
-FROM debian:buster-slim
-
-#COPY etc/apt/sources.list.d/stretch-backports.list etc/apt/sources.list.d/stretch-backports.list
+FROM debian:buster-slim AS bind9
 
 RUN apt-get update \
 	&& apt-get install -y bind9 gosu \
@@ -10,10 +8,6 @@ RUN apt-get update \
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY entrypoint/bind9 /usr/local/share/container/entrypoint/
 COPY bin/container-user bin/local-user /usr/local/share/container/bin/
-#COPY healthcheck/nginx /usr/local/share/container/healthcheck/
-#COPY etc/nginx/conf.d/00-increase-client-max-body-size.conf /etc/nginx/conf.d/00-increase-client-max-body-size.conf
-#COPY etc/nginx/modules-enabled/99-docker-modules.conf /etc/nginx/modules-enabled/99-docker-modules.conf
-#HEALTHCHECK --interval=15s CMD ["/usr/local/share/container/healthcheck/nginx"]
 
 EXPOSE 53/tcp 53/udp
 
@@ -22,3 +16,16 @@ EXPOSE 53/tcp 53/udp
 
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/bind9"]
 CMD ["/usr/sbin/named", "-u", "bind", "-g"]
+
+FROM debian:buster-slim AS tools
+
+RUN apt-get update \
+	&& apt-get install -y gosu bind9-host whois \
+	&& find /var/cache/apt /var/lib/apt -type f -delete \
+	&& true
+
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY bin/local-user /usr/local/share/container/bin/
+
+ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
+CMD ["sleep", "infinity"]
