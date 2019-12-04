@@ -24,6 +24,7 @@ echo "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -c
 apt-get update
 apt-get install -y docker-ce
 /etc/init.d/docker start
+adduser localdev docker
 
 # docker-compose
 wget -q https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m) -O /usr/local/bin/docker-compose
