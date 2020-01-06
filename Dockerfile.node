@@ -7,7 +7,7 @@ ARG NPM_VERSION=latest
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 RUN true \
 	&& apt-get update \
-	&& apt-get install -y gosu fontforge \
+	&& apt-get install -y dumb-init gosu fontforge \
 	&& find /var/lib/apt/lists /var/cache/apt/archives -type f -delete \
 	&& npm install -g npm@$NPM_VERSION \
 	&& true

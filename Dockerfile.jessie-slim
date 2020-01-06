@@ -1,8 +1,20 @@
-FROM debian:jessie-slim AS image-base
+FROM debian:jessie-slim AS image-base-configured
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 COPY etc/apt/apt.conf.d/disable-validity-check.apt.conf etc/apt/apt.conf.d/
 COPY etc/apt/sources.list.d/jessie-backports.list /etc/apt/sources.list.d/
+
+FROM image-base-configured AS source-builder
+
+RUN true \
+	&& ulimit -n 2048 \
+	&& apt-get update \
+	&& apt-get install -y gcc make git ca-certificates libc6-dev \
+	&& git clone https://github.com/Yelp/dumb-init.git \
+	&& cd dumb-init && make && cd / \
+	&& true
+
+FROM image-base-configured AS image-base
 
 RUN true \
 	&& ulimit -n 2048 \
@@ -10,6 +22,8 @@ RUN true \
 	&& apt-get install -y apt-transport-https gosu ssmtp sudo \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
+
+COPY --from=source-builder /dumb-init/dumb-init /usr/local/sbin/dumb-init
 
 FROM scratch AS script-base
 

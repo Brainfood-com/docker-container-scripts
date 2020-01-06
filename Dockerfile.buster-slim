@@ -5,7 +5,7 @@ COPY etc/apt/sources.list.d/buster-backports.list /etc/apt/sources.list.d/
 
 RUN true \
 	&& apt-get update \
-	&& apt-get install -y apt-transport-https gosu sudo \
+	&& apt-get install -y apt-transport-https dumb-init gosu sudo \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 

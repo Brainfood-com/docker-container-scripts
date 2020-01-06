@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ $$ -eq 1 ]] && which dumb-init > /dev/null; then
+	exec dumb-init -- "$0" "$@"
+	echo "Failure re-execing dumb-init!" 1>&2
+	exit 1
+fi
+
 set -e
 
 . /usr/local/share/container/scripts/adjust-term

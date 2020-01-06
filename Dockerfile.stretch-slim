@@ -10,7 +10,7 @@ COPY etc/apt/sources.list.d/stretch-backports.list /etc/apt/sources.list.d/
 
 RUN true \
 	&& apt-get update \
-	&& apt-get install -y apt-transport-https gosu ssmtp sudo \
+	&& apt-get install -y apt-transport-https dumb-init gosu ssmtp sudo \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
