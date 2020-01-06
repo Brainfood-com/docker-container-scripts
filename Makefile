@@ -8,10 +8,10 @@ GIT_BRANCH := $(shell git branch --list | sed -n '/^\*/{s/^\* //;s/.* rebasing \
 
 IMAGE_PREFIX := docker.brainfood.com/shared
 
-OTHER_IMAGES := dockergen mariadb-10.1 nexus3 node postgresql
+OTHER_IMAGES := dockergen mariadb-10.1 nexus3 node postgresql roundcube
 DEBIAN_BASES := jessie-slim stretch-slim buster-slim
 JESSIE_IMAGES := mysql-5.5 php5
-STRETCH_IMAGES := dovecot file-access java8 nginx php7 postfix roundcube squid
+STRETCH_IMAGES := dovecot file-access java8 nginx php7 postfix squid
 BUSTER_IMAGES := bind9 nextcloud
 
 ALL_IMAGES += $(OTHER_IMAGES)
@@ -31,7 +31,9 @@ stretch: $(patsubst %,$(IMAGE_PREFIX)/%,$(STRETCH_IMAGES))
 buster: $(patsubst %,$(IMAGE_PREFIX)/%,$(BUSTER_IMAGES))
 
 $(patsubst %,$(IMAGE_PREFIX)/%,$(ALL_IMAGES)): $(IMAGE_PREFIX)/%: Dockerfile.%
-	docker build -t $(IMAGE_PREFIX)/$*:$(GIT_VERSION) -t $(IMAGE_PREFIX)/$*:$(GIT_BRANCH) -f Dockerfile.$* .
+	docker build --build-arg VERSION=$(GIT_BRANCH) -t $(IMAGE_PREFIX)/$*:$(GIT_VERSION) -t $(IMAGE_PREFIX)/$*:$(GIT_BRANCH) -f Dockerfile.$* .
+
+$(IMAGE_PREFIX)/roundcube: $(IMAGE_PREFIX)/php7
 
 .PHONY: all other bases jessie stretch buster
 .PHONY: $(patsubst %,$(IMAGE_PREFIX)/% bf-%, $(ALL_IMAGES))

@@ -1,10 +1,10 @@
-FROM debian:stretch-slim
+ARG VERSION=latest
+ARG IMAGE_PREFIX=docker.brainfood.com/shared
+FROM $IMAGE_PREFIX/stretch-slim:$VERSION
 
 ARG NGINX_UPGRADE
 
 EXPOSE 80 443
-
-COPY etc/apt/sources.list.d/stretch-backports.list etc/apt/sources.list.d/stretch-backports.list
 
 RUN apt-get update \
 	&& apt-get install -t stretch-backports -y nginx libnginx-mod-http-lua \
@@ -16,7 +16,6 @@ RUN apt-get update \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
-COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY healthcheck/nginx /usr/local/share/container/healthcheck/
 COPY etc/nginx/conf.d/00-increase-client-max-body-size.conf /etc/nginx/conf.d/00-increase-client-max-body-size.conf
 COPY etc/nginx/modules-enabled/99-docker-modules.conf /etc/nginx/modules-enabled/99-docker-modules.conf

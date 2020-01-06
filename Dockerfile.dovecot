@@ -1,15 +1,15 @@
-FROM debian:stretch-slim
+ARG VERSION=latest
+ARG IMAGE_PREFIX=docker.brainfood.com/shared
+FROM $IMAGE_PREFIX/stretch-slim:$VERSION
 
-COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 COPY etc/dovecot/dovecot.conf /etc/dovecot/conf.d/99-docker.conf
 RUN apt-get update \
-	&& apt-get install -y ssmtp dovecot-sqlite dovecot-imapd \
+	&& apt-get install -y dovecot-sqlite dovecot-imapd \
 	&& addgroup hostgroup \
 	&& adduser --gecos 'Host User' --ingroup hostgroup --disabled-password hostuser \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
-COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY entrypoint/dovecot /usr/local/share/container/entrypoint/
 
 EXPOSE 143

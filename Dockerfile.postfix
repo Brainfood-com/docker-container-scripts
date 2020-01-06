@@ -1,6 +1,7 @@
-FROM debian:stretch-slim
+ARG VERSION=latest
+ARG IMAGE_PREFIX=docker.brainfood.com/shared
+FROM $IMAGE_PREFIX/stretch-slim:$VERSION
 
-COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 RUN apt-get update \
 	&& apt-get install -y bsd-mailx postfix rsyslog \
 	&& addgroup hostgroup \
@@ -9,8 +10,6 @@ RUN apt-get update \
 	&& true
 
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
-#COPY adjust-user adjust-term container-entrypoint container-postfix-entrypoint /usr/local/share/container-scripts/
-COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY entrypoint/postfix /usr/local/share/container/entrypoint/
 
 EXPOSE 25

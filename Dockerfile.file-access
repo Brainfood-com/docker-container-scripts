@@ -1,3 +1,5 @@
+ARG VERSION=latest
+ARG IMAGE_PREFIX=docker.brainfood.com/shared
 FROM debian:stretch-slim AS source-build
 
 ARG BUP_VERSION=0.29.2
@@ -19,13 +21,11 @@ RUN true \
 	&& find /srv/bup -type f -print0|xargs -0 ls -l \
 	&& true
 
-FROM debian:stretch-slim
+FROM $IMAGE_PREFIX/stretch-slim:$VERSION
 
-COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
-COPY etc/apt/sources.list.d/stretch-backports.list /etc/apt/sources.list.d/
 RUN true \
 	&& apt-get update \
-	&& apt-get install -y rsync openssh-server openssh-client ssmtp sudo rsyslog procps git gosu mydumper mycli mysql-client duplicity gnupg bup \
+	&& apt-get install -y rsync openssh-server openssh-client rsyslog procps git mydumper mycli mysql-client duplicity gnupg bup \
 	&& apt-get install -y -t stretch-backports git-annex \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
@@ -47,10 +47,8 @@ RUN true \
 	&& gosu file-access sh -c 'cat .ssh/id_rsa.pub >> .ssh/authorized_keys' \
 	&& true
 
-# && apt-get install -y rsync openssh-server openssh-client ssmtp sudo rsyslog libnss-db
+# && apt-get install -y rsync openssh-server openssh-client sudo rsyslog libnss-db
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
-COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
-COPY bin/container-user bin/local-user /usr/local/share/container/bin/
 COPY --from=source-build /srv/bup/ /
 
 #EXPOSE 9000
