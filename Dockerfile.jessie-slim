@@ -19,7 +19,8 @@ FROM image-base-configured AS image-base
 RUN true \
 	&& ulimit -n 2048 \
 	&& apt-get update \
-	&& apt-get install -y apt-transport-https gosu ssmtp sudo \
+	&& apt-get install -y apt-transport-https libnss-extrausers gosu ssmtp sudo \
+	&& sed -i '/^\(passwd\|group\|shadow\):/s/$/ extrausers/' /etc/nsswitch.conf \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
