@@ -1,0 +1,14 @@
+FROM debian:buster-slim
+
+COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
+COPY etc/apt/sources.list.d/buster-backports.list /etc/apt/sources.list.d/
+
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY bin/container-user bin/local-user /usr/local/share/container/bin/
+
+RUN true \
+	&& apt-get update \
+	&& apt-get install -y apt-transport-https gosu sudo \
+	&& find /var/cache/apt /var/lib/apt -type f -delete \
+	&& true
+

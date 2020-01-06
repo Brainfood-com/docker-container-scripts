@@ -1,0 +1,16 @@
+FROM debian:jessie-slim
+
+COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
+COPY etc/apt/apt.conf.d/disable-validity-check.apt.conf etc/apt/apt.conf.d/
+COPY etc/apt/sources.list.d/jessie-backports.list /etc/apt/sources.list.d/
+
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY bin/container-user bin/local-user /usr/local/share/container/bin/
+
+RUN true \
+	&& ulimit -n 2048 \
+	&& apt-get update \
+	&& apt-get install -y apt-transport-https gosu ssmtp sudo \
+	&& find /var/cache/apt /var/lib/apt -type f -delete \
+	&& true
+
