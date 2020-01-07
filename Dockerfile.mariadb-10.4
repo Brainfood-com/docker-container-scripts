@@ -1,0 +1,25 @@
+ARG VERSION=latest
+ARG IMAGE_PREFIX=docker.brainfood.com/shared
+FROM mariadb:10.4 AS image-base
+
+RUN true \
+	&& apt-get update \
+	&& apt-get install -y dumb-init mariadb-server-10.4 mariadb-client-10.4 rsyslog mycli mydumper less \
+	&& find /var/lib/apt/lists /var/cache/apt/archives -type f -delete \
+	&& true
+
+FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+
+COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
+COPY bin/mysql bin/mysqldump bin/mycli bin/myloader /usr/local/share/container/bin/
+COPY etc/mysql/mariadb.conf.d/99-docker.cnf /etc/mysql/conf.d/99-docker.cnf
+ENV LANG C.UTF-8
+ENV CONTAINER_USER mysql
+ENV CONTAINER_GROUP mysql
+
+EXPOSE 3306
+ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/docker-entrypoint.sh"]
+CMD ["mysqld"]
+
+FROM image-base AS final-output
+COPY --from=script-base / /

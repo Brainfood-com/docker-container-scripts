@@ -8,7 +8,7 @@ GIT_BRANCH := $(shell git branch --list | sed -n '/^\*/{s/^\* //;s/.* rebasing \
 
 IMAGE_PREFIX := docker.brainfood.com/shared
 
-OTHER_IMAGES := dockergen mariadb-10.1 nexus3 node postgresql roundcube
+OTHER_IMAGES := dockergen mariadb-10.1 mariadb-10.4 nexus3 node postgresql roundcube
 DEBIAN_BASES := jessie-slim stretch-slim buster-slim
 JESSIE_IMAGES := mysql-5.5 php5
 STRETCH_IMAGES := dovecot file-access java8 nginx php7 postfix squid
