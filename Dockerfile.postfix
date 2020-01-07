@@ -1,6 +1,6 @@
 ARG VERSION=latest
 ARG IMAGE_PREFIX=docker.brainfood.com/shared
-FROM $IMAGE_PREFIX/stretch-slim-base:$VERSION AS image-base
+FROM $IMAGE_PREFIX/buster-slim-base:$VERSION AS image-base
 
 RUN apt-get update \
 	&& apt-get install -y bsd-mailx postfix rsyslog \

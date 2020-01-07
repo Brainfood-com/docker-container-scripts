@@ -3,10 +3,10 @@ ARG IMAGE_PREFIX=docker.brainfood.com/shared
 ARG WP_CLI_IMAGE=wordpress:cli
 FROM $WP_CLI_IMAGE as wordpress-cli
 
-FROM $IMAGE_PREFIX/stretch-slim-base:$VERSION AS image-base
+FROM $IMAGE_PREFIX/buster-slim-base:$VERSION AS image-base
 
 RUN apt-get update \
-	&& apt-get install -y php7.0-cli php7.0-fpm php7.0-curl php7.0-mysql php7.0-gd mysql-client \
+	&& apt-get install -y php7.3-cli php7.3-fpm php7.3-curl php7.3-mysql php7.3-gd default-mysql-client \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& mkdir -p /run/php \
 	&& true
@@ -15,7 +15,7 @@ FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
 
 COPY --from=wordpress-cli /usr/local/bin/wp /usr/local/bin/wp
 COPY php-cli.ini /etc/php5/cli/conf.d/99-docker.conf
-COPY php-fpm-pool-www.conf /etc/php/7.0/fpm/pool.d/zz-www.conf
+COPY php-fpm-pool-www.conf /etc/php/7.3/fpm/pool.d/zz-www.conf
 COPY entrypoint/php /usr/local/share/container/entrypoint/
 
 ENV CONTAINER_USER www-data
@@ -23,7 +23,7 @@ ENV CONTAINER_GROUP www-data
 
 EXPOSE 9000
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
-CMD ["/usr/sbin/php-fpm7.0", "-F"]
+CMD ["/usr/sbin/php-fpm7.3", "-F"]
 
 FROM image-base AS final-output
 COPY --from=script-base / /

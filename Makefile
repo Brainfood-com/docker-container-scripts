@@ -11,8 +11,8 @@ IMAGE_PREFIX := docker.brainfood.com/shared
 OTHER_IMAGES := dockergen mariadb-10.1 mariadb-10.4 nexus3 node postgresql roundcube
 DEBIAN_BASES := jessie-slim stretch-slim buster-slim
 JESSIE_IMAGES := mysql-5.5 php5
-STRETCH_IMAGES := dovecot file-access java8 nginx php7 postfix squid
-BUSTER_IMAGES := bind9 nextcloud
+STRETCH_IMAGES := java8
+BUSTER_IMAGES := bind9 dovecot file-access nextcloud nginx php7 postfix squid
 
 ALL_IMAGES += $(DEBIAN_BASES)
 ALL_IMAGES += $(JESSIE_IMAGES)

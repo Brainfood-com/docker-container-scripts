@@ -1,11 +1,11 @@
 ARG VERSION=latest
 ARG IMAGE_PREFIX=docker.brainfood.com/shared
-FROM $IMAGE_PREFIX/stretch-slim-base:$VERSION AS image-base
+FROM $IMAGE_PREFIX/buster-slim-base:$VERSION AS image-base
 
 ARG NGINX_UPGRADE
 
 RUN apt-get update \
-	&& apt-get install -t stretch-backports -y nginx libnginx-mod-http-lua \
+	&& apt-get install -t buster-backports -y nginx libnginx-mod-http-lua \
 	&& ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log \
 	&& rm /etc/nginx/sites-enabled/default \

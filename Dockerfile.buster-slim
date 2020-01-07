@@ -5,7 +5,7 @@ COPY etc/apt/sources.list.d/buster-backports.list /etc/apt/sources.list.d/
 
 RUN true \
 	&& apt-get update \
-	&& apt-get install -y apt-transport-https dumb-init libnss-extrausers gosu sudo \
+	&& apt-get install -y apt-transport-https dumb-init libnss-extrausers gosu msmtp-mta sudo \
 	&& sed -i '/^\(passwd\|group\|shadow\):/s/$/ extrausers/' /etc/nsswitch.conf \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
@@ -13,6 +13,7 @@ RUN true \
 FROM scratch AS script-base
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY bin/container-user bin/local-user /usr/local/share/container/bin/
+COPY etc/msmtprc etc/msmtprc
 
 FROM image-base AS final-output
 COPY --from=script-base / /

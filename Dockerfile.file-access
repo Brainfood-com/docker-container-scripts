@@ -1,6 +1,6 @@
 ARG VERSION=latest
 ARG IMAGE_PREFIX=docker.brainfood.com/shared
-FROM debian:stretch-slim AS source-build
+FROM $IMAGE_PREFIX/buster-slim:$VERSION as source-build
 
 ARG BUP_VERSION=0.29.2
 ADD https://github.com/bup/bup/archive/${BUP_VERSION}.tar.gz /usr/src/bup-${BUP_VERSION}.tar.gz
@@ -21,14 +21,14 @@ RUN true \
 	&& find /srv/bup -type f -print0|xargs -0 ls -l \
 	&& true
 
-FROM $IMAGE_PREFIX/stretch-slim-base:$VERSION AS image-base
+FROM $IMAGE_PREFIX/buster-slim-base:$VERSION AS image-base
 
 COPY home/file-access/.ssh/ home/file-access/.ssh/
 
 RUN true \
 	&& apt-get update \
-	&& apt-get install -y rsync openssh-server openssh-client rsyslog procps git mydumper mycli mysql-client duplicity gnupg bup \
-	&& apt-get install -y -t stretch-backports git-annex \
+	&& apt-get install -y rsync openssh-server openssh-client rsyslog procps git mydumper mycli default-mysql-client duplicity gnupg \
+	&& apt-get install -y -t buster-backports git-annex \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& addgroup file-access \
 	&& adduser --gecos file-access --ingroup file-access --disabled-password file-access \
