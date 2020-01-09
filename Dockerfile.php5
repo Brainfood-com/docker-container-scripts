@@ -6,7 +6,9 @@ FROM debian:jessie-slim
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 COPY etc/apt/apt.conf.d/disable-validity-check.apt.conf /etc/apt/apt.conf.d/
 COPY etc/apt/sources.list.d/jessie-backports.list /etc/apt/sources.list.d/
-RUN apt-get update \
+RUN true \
+	&& ulimit -n 2048 \
+	&& apt-get update \
 	&& apt-get install -y php5-cli php5-fpm php5-curl php5-mysql php5-gd php5-mcrypt ssmtp sudo less mysql-client gosu \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& mkdir -p /run/php \

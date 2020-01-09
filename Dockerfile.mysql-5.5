@@ -2,6 +2,7 @@ FROM debian:jessie-slim
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 RUN true \
+	&& ulimit -n 2048 \
 	&& apt-get update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server-5.5 mysql-client-5.5 rsyslog less \
 	&& find /var/lib/apt/lists /var/cache/apt/archives -type f -delete \
