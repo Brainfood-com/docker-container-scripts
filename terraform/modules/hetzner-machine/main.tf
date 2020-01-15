@@ -38,9 +38,20 @@ variable "service_ips" {
 	description = "Public floating ips to take control of"
 }
 
+variable "volumes" {
+	type = list(string)
+	default = []
+	description = "Disks to attach to the machine"
+}
+
 data "hcloud_network" "discovered_networks" {
 	count = length(var.networks)
 	name = var.networks[count.index].name
+}
+
+data "hcloud_volume" "discovered_volumes" {
+	count = length(var.volumes)
+	name = var.volumes[count.index]
 }
 
 resource "hcloud_server" "server" {
@@ -60,6 +71,13 @@ resource "hcloud_server_network" "srvnetwork" {
 	ip = var.networks[count.index].ip
 	# TODO: network config on target machine
 # ip = "10.0.1.5"
+}
+
+resource "hcloud_volume_attachment" "srvvolume" {
+	count = length(var.volumes)
+	server_id = hcloud_server.server.id
+	volume_id = data.hcloud_volume.discovered_volumes[count.index].id
+	automount = false
 }
 
 resource "null_resource" "skel" {
@@ -111,7 +129,7 @@ resource "null_resource" "enable_floating_ips" {
 	}
 }
 locals {
-	all_configured = join(",", concat([hcloud_server.server.id], hcloud_server_network.srvnetwork.*.id))
+	all_configured = join(",", concat([hcloud_server.server.id], hcloud_server_network.srvnetwork.*.id, hcloud_volume_attachment.srvvolume.*.id))
 }
 
 output "connection" {
