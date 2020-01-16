@@ -110,14 +110,18 @@ resource "null_resource" "enable_floating_ips" {
 		]
 	}
 }
+locals {
+	all_configured = join(",", concat([hcloud_server.server.id], hcloud_server_network.srvnetwork.*.id))
+}
+
 output "connection" {
 	value = {
-		instance	= hcloud_server.server.id
+		instance	= local.all_configured
 		host		= hcloud_server.server.ipv4_address
 		user		= "root"
 	}
 }
 output "depended_on" {
-	value = join(",", concat([hcloud_server.server.id], hcloud_server_network.srvnetwork.*.id))
+	value = local.all_configured
 }
 
