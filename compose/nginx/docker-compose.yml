@@ -56,6 +56,8 @@ services:
     container_name: nginx-gen
     depends_on:
       - nginx
+    environment:
+      - DEFAULT_HOST
     image: bf-dockergen
     networks:
       nginx:
@@ -68,6 +70,7 @@ services:
 
   letsencrypt:
     environment:
+      - DEFAULT_EMAIL
       - NGINX_PROXY_CONTAINER=nginx
       - NGINX_DOCKER_GEN_CONTAINER=nginx-gen
     depends_on:
