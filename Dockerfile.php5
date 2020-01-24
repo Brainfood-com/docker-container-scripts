@@ -1,5 +1,5 @@
 ARG WP_CLI_IMAGE=wordpress:cli
-FROM $WP_CLI_IMAGE as cli
+FROM $WP_CLI_IMAGE as wordpress-cli
 
 FROM debian:jessie-slim
 
@@ -14,7 +14,7 @@ RUN true \
 	&& mkdir -p /run/php \
 	&& true
 
-COPY --from=cli /usr/local/bin/wp /usr/local/bin/wp
+COPY --from=wordpress-cli /usr/local/bin/wp /usr/local/bin/wp
 COPY php-cli.ini /etc/php5/cli/conf.d/99-docker.conf
 COPY php-fpm-pool-www.conf /etc/php5/fpm/pool.d/zz-www.conf
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/

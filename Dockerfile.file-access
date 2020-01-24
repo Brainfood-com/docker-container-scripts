@@ -1,4 +1,4 @@
-FROM debian:stretch-slim AS bup-build
+FROM debian:stretch-slim AS source-build
 
 ARG BUP_VERSION=0.29.2
 ADD https://github.com/bup/bup/archive/${BUP_VERSION}.tar.gz /usr/src/bup-${BUP_VERSION}.tar.gz
@@ -51,7 +51,7 @@ RUN true \
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY bin/container-user bin/local-user /usr/local/share/container/bin/
-COPY --from=bup-build /srv/bup/ /
+COPY --from=source-build /srv/bup/ /
 
 #EXPOSE 9000
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
