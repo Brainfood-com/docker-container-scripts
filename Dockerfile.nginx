@@ -1,10 +1,8 @@
 ARG VERSION=latest
 ARG IMAGE_PREFIX=docker.brainfood.com/shared
-FROM $IMAGE_PREFIX/stretch-slim:$VERSION
+FROM $IMAGE_PREFIX/stretch-slim-base:$VERSION AS image-base
 
 ARG NGINX_UPGRADE
-
-EXPOSE 80 443
 
 RUN apt-get update \
 	&& apt-get install -t stretch-backports -y nginx libnginx-mod-http-lua \
@@ -16,6 +14,8 @@ RUN apt-get update \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
+FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+
 COPY healthcheck/nginx /usr/local/share/container/healthcheck/
 COPY etc/nginx/conf.d/00-increase-client-max-body-size.conf /etc/nginx/conf.d/00-increase-client-max-body-size.conf
 COPY etc/nginx/modules-enabled/99-docker-modules.conf /etc/nginx/modules-enabled/99-docker-modules.conf
@@ -23,3 +23,7 @@ HEALTHCHECK --interval=15s CMD ["/usr/local/share/container/healthcheck/nginx"]
 
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
 CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 80 443
+
+FROM image-base AS final-output
+COPY --from=script-base / /

@@ -1,5 +1,7 @@
+ARG VERSION=latest
+ARG IMAGE_PREFIX=docker.brainfood.com/shared
 ARG NODE_IMAGE=node:11-stretch
-FROM $NODE_IMAGE
+FROM $NODE_IMAGE AS image-base
 ARG NPM_VERSION=latest
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
@@ -10,12 +12,15 @@ RUN true \
 	&& npm install -g npm@$NPM_VERSION \
 	&& true
 
-COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+
 COPY entrypoint/node /usr/local/share/container/entrypoint/
 COPY healthcheck/node-port /usr/local/share/container/healthcheck/
-COPY bin/local-user bin/container-user /usr/local/share/container/bin/
 
 ENV CONTAINER_USER node
 ENV CONTAINER_GROUP node
 
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/node"]
+
+FROM image-base AS final-output
+COPY --from=script-base / /

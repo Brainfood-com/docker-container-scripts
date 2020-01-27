@@ -1,5 +1,7 @@
+ARG VERSION=latest
+ARG IMAGE_PREFIX=docker.brainfood.com/shared
 # The base layer used for both prod and dev builds.
-FROM postgres:10.3 AS postgres-base
+FROM postgres:10.3 AS image-base
 
 HEALTHCHECK CMD ["su", "postgres", "-c", "psql -c 'select 1;'"]
 
@@ -8,6 +10,8 @@ RUN apt-get update \
         && apt-get install --no-install-suggests --no-install-recommends -y less gosu postgresql-10-postgis-2.4 postgresql-10-postgis-2.4-scripts postgresql-10-pgrouting libpostgresql-jdbc-java \
         && find /var/lib/apt/lists /var/cache/apt/archives -type f -delete \
         && true
+
+FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
 
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY bin/container-user bin/local-user /usr/local/share/container/bin/
@@ -18,3 +22,5 @@ ENV CONTAINER_GROUP postgres
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/docker-entrypoint.sh"]
 CMD ["postgres"]
 
+FROM image-base AS final-output
+COPY --from=script-base / /

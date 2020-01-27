@@ -1,6 +1,6 @@
 ARG VERSION=latest
 ARG IMAGE_PREFIX=docker.brainfood.com/shared
-FROM $IMAGE_PREFIX/stretch-slim:$VERSION
+FROM $IMAGE_PREFIX/stretch-slim-base:$VERSION AS image-base
 
 RUN apt-get update \
 	&& apt-get install -y bsd-mailx postfix rsyslog \
@@ -9,6 +9,8 @@ RUN apt-get update \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
+FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
 COPY entrypoint/postfix /usr/local/share/container/entrypoint/
 
@@ -16,3 +18,5 @@ EXPOSE 25
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/postfix"]
 CMD ["/usr/lib/postfix/sbin/master", "-d"]
 
+FROM image-base AS final-output
+COPY --from=script-base / /

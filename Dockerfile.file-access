@@ -21,33 +21,31 @@ RUN true \
 	&& find /srv/bup -type f -print0|xargs -0 ls -l \
 	&& true
 
-FROM $IMAGE_PREFIX/stretch-slim:$VERSION
+FROM $IMAGE_PREFIX/stretch-slim-base:$VERSION AS image-base
+
+COPY home/file-access/.ssh/ home/file-access/.ssh/
 
 RUN true \
 	&& apt-get update \
 	&& apt-get install -y rsync openssh-server openssh-client rsyslog procps git mydumper mycli mysql-client duplicity gnupg bup \
 	&& apt-get install -y -t stretch-backports git-annex \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
-	&& true
-
-ENV CONTAINER_USER file-access
-ENV CONTAINER_GROUP file-access
-RUN true \
 	&& addgroup file-access \
 	&& adduser --gecos file-access --ingroup file-access --disabled-password file-access \
 	&& chown -R file-access:file-access /home/file-access \
-	&& true
-
-COPY home/file-access/.ssh/ home/file-access/.ssh/
-COPY etc/sudoers.d/file-access etc/sudoers.d/file-access
-RUN true \
 	&& cd /home/file-access \
 	&& chown -R file-access:file-access /home/file-access \
 	&& gosu file-access ssh-keygen -N '' -t rsa -f .ssh/id_rsa \
 	&& gosu file-access sh -c 'cat .ssh/id_rsa.pub >> .ssh/authorized_keys' \
 	&& true
 
-# && apt-get install -y rsync openssh-server openssh-client sudo rsyslog libnss-db
+COPY --from=source-build /srv/bup/ /
+
+FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+
+ENV CONTAINER_USER file-access
+ENV CONTAINER_GROUP file-access
+COPY etc/sudoers.d/file-access etc/sudoers.d/file-access
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
 COPY --from=source-build /srv/bup/ /
 
@@ -55,3 +53,5 @@ COPY --from=source-build /srv/bup/ /
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
 CMD ["sleep", "infinity"]
 
+FROM image-base AS final-output
+COPY --from=script-base / /

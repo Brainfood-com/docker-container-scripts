@@ -1,6 +1,6 @@
 ARG VERSION=latest
 ARG IMAGE_PREFIX=docker.brainfood.com/shared
-FROM $IMAGE_PREFIX/jessie-slim:$VERSION
+FROM $IMAGE_PREFIX/jessie-slim-base:$VERSION AS image-base
 
 RUN true \
 	&& ulimit -n 2048 \
@@ -13,6 +13,8 @@ RUN true \
 	&& mkdir /var/lib/mysql \
 	&& true
 
+FROM $IMAGE_PREFIX/jessie-slim-script:$VERSION AS script-base
+
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
 COPY entrypoint/mysql /usr/local/share/container/entrypoint/
 COPY bin/mysql bin/mycli bin/myloader /usr/local/share/container/bin/
@@ -22,3 +24,6 @@ ENV CONTAINER_GROUP mysql
 EXPOSE 3306
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "mysql"]
 CMD ["/usr/bin/mysqld_safe"]
+
+FROM image-base AS final-output
+COPY --from=script-base / /

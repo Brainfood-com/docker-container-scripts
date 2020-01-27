@@ -1,11 +1,13 @@
 ARG VERSION=latest
 ARG IMAGE_PREFIX=docker.brainfood.com/shared
-FROM $IMAGE_PREFIX/buster-slim:$VERSION AS bind9
+FROM $IMAGE_PREFIX/buster-slim-base:$VERSION AS image-base
 
 RUN apt-get update \
 	&& apt-get install -y bind9 \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
+
+FROM $IMAGE_PREFIX/buster-slim-script:$VERSION AS script-base
 
 COPY entrypoint/bind9 /usr/local/share/container/entrypoint/
 
@@ -16,6 +18,9 @@ EXPOSE 53/tcp 53/udp
 
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/bind9"]
 CMD ["/usr/sbin/named", "-u", "bind", "-g"]
+
+FROM image-base AS final-output
+COPY --from=script-base / /
 
 FROM $IMAGE_PREFIX/buster-slim:$VERSION AS tools
 

@@ -1,10 +1,12 @@
-FROM debian:stretch-slim
-
-COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
-COPY etc/apt/sources.list.d/stretch-backports.list /etc/apt/sources.list.d/
+FROM scratch AS script-base
 
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY bin/container-user bin/local-user /usr/local/share/container/bin/
+
+FROM debian:stretch-slim AS image-base
+
+COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
+COPY etc/apt/sources.list.d/stretch-backports.list /etc/apt/sources.list.d/
 
 RUN true \
 	&& apt-get update \
@@ -12,3 +14,6 @@ RUN true \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
+FROM image-base AS final-output
+
+COPY --from=script-base / /

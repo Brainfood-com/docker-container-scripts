@@ -1,4 +1,6 @@
-FROM mariadb:10.1
+ARG VERSION=latest
+ARG IMAGE_PREFIX=docker.brainfood.com/shared
+FROM mariadb:10.1 AS image-base
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 RUN true \
@@ -7,9 +9,10 @@ RUN true \
 	&& find /var/lib/apt/lists /var/cache/apt/archives -type f -delete \
 	&& true
 
+FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
-COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
-COPY bin/container-user bin/local-user bin/mysql bin/mysqldump bin/mycli bin/myloader /usr/local/share/container/bin/
+COPY bin/mysql bin/mysqldump bin/mycli bin/myloader /usr/local/share/container/bin/
 COPY etc/mysql/mariadb.conf.d/99-docker.cnf /etc/mysql/conf.d/99-docker.cnf
 ENV LANG C.UTF-8
 ENV CONTAINER_USER mysql
@@ -18,3 +21,6 @@ ENV CONTAINER_GROUP mysql
 EXPOSE 3306
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/docker-entrypoint.sh"]
 CMD ["mysqld"]
+
+FROM image-base AS final-output
+COPY --from=script-base / /

@@ -1,11 +1,8 @@
-FROM debian:jessie-slim
+FROM debian:jessie-slim AS image-base
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 COPY etc/apt/apt.conf.d/disable-validity-check.apt.conf etc/apt/apt.conf.d/
 COPY etc/apt/sources.list.d/jessie-backports.list /etc/apt/sources.list.d/
-
-COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
-COPY bin/container-user bin/local-user /usr/local/share/container/bin/
 
 RUN true \
 	&& ulimit -n 2048 \
@@ -14,3 +11,10 @@ RUN true \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
+FROM scratch AS script-base
+
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY bin/container-user bin/local-user /usr/local/share/container/bin/
+
+FROM image-base AS final-output
+COPY --from=script-base / /
