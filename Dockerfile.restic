@@ -1,0 +1,14 @@
+FROM golang:1.13.8-buster AS restic-builder
+
+RUN true \
+	&& export GO111MODULE=on \
+	&& git clone https://github.com/Brainfood-com/restic.git -b performance \
+	&& cd restic \
+	&& GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -mod=vendor -ldflags "-s -w" -tags selfupdate -o restic_linux_amd64 ./cmd/restic \
+	&& true
+
+FROM alpine:3.11.3
+
+COPY --from=restic-builder /go/restic/restic_linux_amd64 /usr/local/bin/restic
+ENTRYPOINT ["/usr/local/bin/restic"]
+
