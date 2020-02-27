@@ -122,9 +122,9 @@ resource "null_resource" "enable_floating_ips" {
 
 	provisioner "remote-exec" {
 		inline = [
-			"ifdown eth0",
-			"printf 'iface eth0 inet static\n${local.expanded_addresses}' > /etc/network/interfaces.d/99-service-ips.cfg",
-			"ifup eth0",
+			"ifdown eth0:0 || true",
+			"printf '${length(var.service_ips) > 0 ? "iface eth0:0 inet static\n${local.expanded_addresses}" : ""}' > /etc/network/interfaces.d/99-service-ips.cfg",
+			length(var.service_ips) > 0 ? "ifup eth0:0" : "true",
 		]
 	}
 }
