@@ -50,8 +50,8 @@ COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
 COPY --from=source-build /srv/bup/ /
 
 #EXPOSE 9000
-ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
-CMD ["sleep", "infinity"]
 
 FROM image-base AS final-output
 COPY --from=script-base / /
+ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
+CMD ["sleep", "infinity"]
