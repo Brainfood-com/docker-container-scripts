@@ -46,4 +46,4 @@ $(IMAGE_PREFIX)/mariadb-10.4 $(IMAGE_PREFIX)/node $(IMAGE_PREFIX)/postgresql $(I
 .PHONY: all other bases jessie stretch buster
 .PHONY: $(patsubst %,$(IMAGE_PREFIX)/% bf-%, $(ALL_IMAGES) $(OTHER_IMAGES))
 
-$(patsubst %,bf-%,$(ALL_IMAGES)): bf-%: $(IMAGE_PREFIX)/%
+$(patsubst %,bf-%,$(ALL_IMAGES) $(OTHER_IMAGES)): bf-%: $(IMAGE_PREFIX)/%
