@@ -11,6 +11,9 @@ FROM $IMAGE_PREFIX/buster-slim-script:$VERSION AS script-base
 
 COPY entrypoint/bind9 /usr/local/share/container/entrypoint/
 
+FROM image-base AS final-output
+COPY --from=script-base / /
+
 EXPOSE 53/tcp 53/udp
 
 #ENV CONTAINER_USER bind
@@ -18,9 +21,6 @@ EXPOSE 53/tcp 53/udp
 
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/bind9"]
 CMD ["/usr/sbin/named", "-u", "bind", "-g"]
-
-FROM image-base AS final-output
-COPY --from=script-base / /
 
 FROM $IMAGE_PREFIX/buster-slim:$VERSION AS tools
 

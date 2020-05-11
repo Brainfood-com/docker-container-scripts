@@ -2,8 +2,6 @@ ARG VERSION=latest
 ARG IMAGE_PREFIX=docker.brainfood.com/shared
 FROM $IMAGE_PREFIX/buster-slim-base:$VERSION AS image-base
 
-EXPOSE 3128
-
 RUN apt-get update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y squid iproute2 \
 	&& apt-get clean \
@@ -13,14 +11,16 @@ RUN apt-get update \
 
 FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
 
-ENV SQUID_cache_dir_size 10240
 #(old) COPY entrypoint /srv/localdev/scripts/entrypoint
 COPY entrypoint/squid /usr/local/share/container/entrypoint/
 COPY healthcheck/squid /usr/local/share/container/healthcheck/
+
+FROM image-base AS final-output
+COPY --from=script-base / /
+
+EXPOSE 3128
+ENV SQUID_cache_dir_size 10240
 HEALTHCHECK --interval=15s CMD ["/usr/local/share/container/healthcheck/squid"]
 
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/squid"]
 CMD ["/usr/sbin/squid", "-NYCd", "1", "-f", "/etc/squid/auto-squid.conf"]
-
-FROM image-base AS final-output
-COPY --from=script-base / /

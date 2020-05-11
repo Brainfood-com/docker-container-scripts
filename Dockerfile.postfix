@@ -14,9 +14,10 @@ FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
 COPY entrypoint/postfix /usr/local/share/container/entrypoint/
 
+FROM image-base AS final-output
+COPY --from=script-base / /
+
 EXPOSE 25
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/postfix"]
 CMD ["/usr/lib/postfix/sbin/master", "-d"]
 
-FROM image-base AS final-output
-COPY --from=script-base / /

@@ -43,8 +43,6 @@ COPY --from=source-build /srv/bup/ /
 
 FROM $IMAGE_PREFIX/buster-slim-script:$VERSION AS script-base
 
-ENV CONTAINER_USER file-access
-ENV CONTAINER_GROUP file-access
 COPY etc/sudoers.d/file-access etc/sudoers.d/file-access
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
 COPY --from=source-build /srv/bup/ /
@@ -53,5 +51,8 @@ COPY --from=source-build /srv/bup/ /
 
 FROM image-base AS final-output
 COPY --from=script-base / /
+
+ENV CONTAINER_USER file-access
+ENV CONTAINER_GROUP file-access
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
 CMD ["sleep", "infinity"]

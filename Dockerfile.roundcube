@@ -18,9 +18,9 @@ FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
 COPY entrypoint/roundcube /usr/local/share/container/entrypoint/
 COPY etc/apache-roundcube/apache-mail-container.conf /etc/apache2/conf-enabled
 
+FROM image-base AS final-output
+COPY --from=script-base / /
+
 EXPOSE 80
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/roundcube"]
 CMD ["/usr/sbin/apache2", "-D", "NO_DETACH"]
-
-FROM image-base AS final-output
-COPY --from=script-base / /

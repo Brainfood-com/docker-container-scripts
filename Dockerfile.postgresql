@@ -16,11 +16,11 @@ FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY bin/container-user bin/local-user /usr/local/share/container/bin/
 
+FROM image-base AS final-output
+COPY --from=script-base / /
+
 ENV CONTAINER_USER postgres
 ENV CONTAINER_GROUP postgres
 
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/docker-entrypoint.sh"]
 CMD ["postgres"]
-
-FROM image-base AS final-output
-COPY --from=script-base / /

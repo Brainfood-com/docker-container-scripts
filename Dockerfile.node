@@ -18,10 +18,10 @@ FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
 COPY entrypoint/node /usr/local/share/container/entrypoint/
 COPY healthcheck/node-port /usr/local/share/container/healthcheck/
 
+FROM image-base AS final-output
+COPY --from=script-base / /
+
 ENV CONTAINER_USER node
 ENV CONTAINER_GROUP node
 
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/node"]
-
-FROM image-base AS final-output
-COPY --from=script-base / /

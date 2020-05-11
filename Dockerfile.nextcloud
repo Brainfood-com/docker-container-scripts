@@ -18,6 +18,9 @@ COPY --from=nextcloud /upgrade.exclude /upgrade.exclude
 COPY php-cli.ini /etc/php/7.3/cli/conf.d/99-docker.conf
 COPY php-fpm-pool-www.conf /etc/php/7.3/fpm/pool.d/zz-www.conf
 
+FROM image-base AS final-output
+COPY --from=script-base / /
+
 ENV CONTAINER_USER www-data
 ENV CONTAINER_GROUP www-data
 ENV NEXTCLOUD_UPDATE 1
@@ -25,6 +28,3 @@ ENV NEXTCLOUD_UPDATE 1
 EXPOSE 9000
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/nextcloud"]
 CMD ["/usr/sbin/php-fpm7.3", "-F"]
-
-FROM image-base AS final-output
-COPY --from=script-base / /

@@ -14,6 +14,9 @@ FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
 COPY bin/mysql bin/mysqldump bin/mycli bin/myloader /usr/local/share/container/bin/
 COPY etc/mysql/mariadb.conf.d/99-docker.cnf /etc/mysql/conf.d/99-docker.cnf
+
+FROM image-base AS final-output
+COPY --from=script-base / /
 ENV LANG C.UTF-8
 ENV CONTAINER_USER mysql
 ENV CONTAINER_GROUP mysql
@@ -21,6 +24,3 @@ ENV CONTAINER_GROUP mysql
 EXPOSE 3306
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/docker-entrypoint.sh"]
 CMD ["mysqld"]
-
-FROM image-base AS final-output
-COPY --from=script-base / /

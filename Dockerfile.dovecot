@@ -14,9 +14,9 @@ FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
 COPY etc/dovecot/dovecot.conf /etc/dovecot/conf.d/99-docker.conf
 COPY entrypoint/dovecot /usr/local/share/container/entrypoint/
 
+FROM image-base AS final-output
+COPY --from=script-base / /
+
 EXPOSE 143
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/dovecot"]
 CMD ["/usr/sbin/dovecot", "-F"]
-
-FROM image-base AS final-output
-COPY --from=script-base / /

@@ -16,10 +16,10 @@ FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
 
 COPY entrypoint/java /usr/local/share/container/entrypoint/
 
+FROM image-base AS final-output
+COPY --from=script-base / /
+
 ENV CONTAINER_USER java
 ENV CONTAINER_GROUP java
 
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/java"]
-
-FROM image-base AS final-output
-COPY --from=script-base / /
