@@ -3,7 +3,13 @@ ARG IMAGE_PREFIX=docker.brainfood.com/shared
 FROM $IMAGE_PREFIX/buster-slim-base:$VERSION AS image-base
 
 RUN apt-get update \
-	&& apt-get install -y bsd-mailx postfix rsyslog \
+	&& echo 'replace-me.localdomain' > /etc/mailname \
+	&& grep private.brainfood.com /etc -r \
+	&& sed -e '/^search /s/\. / /g;/^search/s/\.$//' < /etc/resolv.conf > /tmp/resolv.conf \
+	&& cat /tmp/resolv.conf > /etc/resolv.conf \
+	&& grep private.brainfood.com /etc -r \
+	&& DEBIAN_FRONTEND=noninteractive apt-get install -y bsd-mailx postfix rsyslog \
+	&& rm /etc/mailname \
 	&& addgroup hostgroup \
 	&& adduser --gecos 'Host User' --ingroup hostgroup --disabled-password hostuser \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
@@ -18,6 +24,7 @@ FROM image-base AS final-output
 COPY --from=script-base / /
 
 EXPOSE 25
+VOLUME /var/spool/postfix
 ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/share/container/entrypoint/postfix"]
 CMD ["/usr/lib/postfix/sbin/master", "-d"]
 
