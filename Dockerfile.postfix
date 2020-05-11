@@ -9,7 +9,7 @@ RUN apt-get update \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
-FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+FROM $IMAGE_PREFIX/buster-slim-script:$VERSION AS script-base
 
 COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
 COPY entrypoint/postfix /usr/local/share/container/entrypoint/

@@ -1,6 +1,6 @@
 ARG VERSION=latest
 ARG IMAGE_PREFIX=docker.brainfood.com/shared
-FROM $IMAGE_PREFIX/stretch-slim-base:$VERSION AS image-base
+FROM $IMAGE_PREFIX/buster-slim-base:$VERSION AS image-base
 
 RUN apt-get update \
 	&& apt-get install -y dovecot-sqlite dovecot-imapd \
@@ -9,7 +9,7 @@ RUN apt-get update \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
-FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+FROM $IMAGE_PREFIX/buster-slim-script:$VERSION AS script-base
 
 COPY etc/dovecot/dovecot.conf /etc/dovecot/conf.d/99-docker.conf
 COPY entrypoint/dovecot /usr/local/share/container/entrypoint/

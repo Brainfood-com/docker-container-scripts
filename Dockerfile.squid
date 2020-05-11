@@ -9,7 +9,7 @@ RUN apt-get update \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
-FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+FROM $IMAGE_PREFIX/buster-slim-script:$VERSION AS script-base
 
 #(old) COPY entrypoint /srv/localdev/scripts/entrypoint
 COPY entrypoint/squid /usr/local/share/container/entrypoint/

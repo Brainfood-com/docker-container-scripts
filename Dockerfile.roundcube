@@ -13,7 +13,7 @@ RUN apt-get update \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
-FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+FROM $IMAGE_PREFIX/buster-slim-script:$VERSION AS script-base
 
 COPY entrypoint/roundcube /usr/local/share/container/entrypoint/
 COPY etc/apache-roundcube/apache-mail-container.conf /etc/apache2/conf-enabled

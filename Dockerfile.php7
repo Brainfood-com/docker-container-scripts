@@ -11,7 +11,7 @@ RUN apt-get update \
 	&& mkdir -p /run/php \
 	&& true
 
-FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+FROM $IMAGE_PREFIX/buster-slim-script:$VERSION AS script-base
 
 COPY --from=wordpress-cli /usr/local/bin/wp /usr/local/bin/wp
 COPY php-cli.ini /etc/php5/cli/conf.d/99-docker.conf

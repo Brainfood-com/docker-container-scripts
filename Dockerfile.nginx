@@ -14,7 +14,7 @@ RUN apt-get update \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& true
 
-FROM $IMAGE_PREFIX/stretch-slim-script:$VERSION AS script-base
+FROM $IMAGE_PREFIX/buster-slim-script:$VERSION AS script-base
 
 COPY healthcheck/nginx /usr/local/share/container/healthcheck/
 COPY etc/nginx/conf.d/00-increase-client-max-body-size.conf /etc/nginx/conf.d/00-increase-client-max-body-size.conf
