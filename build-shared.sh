@@ -23,4 +23,6 @@ else
 	process_compose $(find "$TOP_DIR/compose" -name docker-compose.yml -printf '%h\n')
 fi
 
-make -C "$TOP_DIR" "${!images[@]}"
+if [[ ${#images[@]} -gt 0 ]]; then
+	make -C "$TOP_DIR" "${!images[@]}"
+fi
