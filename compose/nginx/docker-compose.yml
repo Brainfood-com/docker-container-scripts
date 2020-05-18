@@ -22,15 +22,8 @@ volumes:
 
 services:
   nginx:
-    build:
-      args:
-        - http_proxy
-        - NGINX_UPGRADE=1
-      context: ../..
-      dockerfile: Dockerfile.nginx
-      network: build
     container_name: nginx
-    image: bf-nginx
+    image: ${IMAGE_PREFIX:-docker.brainfood.com/shared/}nginx:${IMAGE_TAG_NGINX:-dev}
     logging:
       <<: *_logging
     networks:
@@ -46,12 +39,6 @@ services:
       - /srv/ssl-certificates:/etc/nginx/certs:ro
 
   dockergen:
-    build:
-      args:
-        - http_proxy
-      context: ../..
-      dockerfile: Dockerfile.dockergen
-      network: build
     command: -notify-sighup nginx -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
     container_name: nginx-gen
     depends_on:
@@ -59,6 +46,7 @@ services:
     environment:
       - DEFAULT_HOST
     image: bf-dockergen
+    image: ${IMAGE_PREFIX:-docker.brainfood.com/shared/}dockergen:${IMAGE_TAG_DOCKERGEN:-dev}
     networks:
       nginx:
     restart: always

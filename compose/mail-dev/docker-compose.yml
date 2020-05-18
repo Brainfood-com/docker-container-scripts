@@ -25,16 +25,10 @@ volumes:
 
 services:
   roundcube:
-    build:
-      args:
-        - http_proxy
-      context: ../..
-      dockerfile: Dockerfile.roundcube
-      network: build
     environment:
       CERT_NAME: ${HOSTING_VHOST_CERT_NAME}
       VIRTUAL_HOST: mail${HOSTING_VHOST_SUFFIX}
-    image: bf-roundcube
+    image: ${IMAGE_PREFIX:-docker.brainfood.com/shared/}roundcube:${IMAGE_TAG_ROUNDCUBE:-dev}
     logging:
       <<: *_logging
     networks:
@@ -43,16 +37,10 @@ services:
     restart: always
 
   dovecot:
-    build:
-      args:
-        - http_proxy
-      context: ../..
-      dockerfile: Dockerfile.dovecot
-      network: build
     domainname: localdev
     environment:
       - DOVECOT_HOSTUSER_PASSWORD
-    image: bf-dovecot
+    image: ${IMAGE_PREFIX:-docker.brainfood.com/shared/}dovecot:${IMAGE_TAG_DOVECOT:-dev}
     logging:
       <<: *_logging
     networks:
@@ -68,18 +56,12 @@ services:
           nocopy: false
 
   postfix:
-    build:
-      args:
-        - http_proxy
-      context: ../..
-      dockerfile: Dockerfile.postfix
-      network: build
     cap_add:
       - SYS_PTRACE
     domainname: localdev
     environment:
       POSTFIX_CATCHALL: 'true'
-    image: bf-postfix
+    image: ${IMAGE_PREFIX:-docker.brainfood.com/shared/}postfix:${IMAGE_TAG_POSTFIX:-dev}
     logging:
       <<: *_logging
     networks:

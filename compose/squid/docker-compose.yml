@@ -16,12 +16,9 @@ volumes:
 
 services:
   squid:
-    build:
-      context: ../..
-      dockerfile: Dockerfile.squid
     environment:
       SQUID_maximum_object_size: 1 GB
-    image: bf-squid
+    image: ${IMAGE_PREFIX:-docker.brainfood.com/shared/}squid:${IMAGE_TAG_SQUID:-dev}
     logging:
       <<: *_logging
     networks:
