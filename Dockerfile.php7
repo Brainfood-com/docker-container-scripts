@@ -1,11 +1,12 @@
 ARG WP_CLI_IMAGE=wordpress:cli
+ARG PHP7_EXTRA_PACKAGES
 FROM $WP_CLI_IMAGE as cli
 
 FROM debian:stretch-slim
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 RUN apt-get update \
-	&& apt-get install -y php7.0-cli php7.0-fpm php7.0-curl php7.0-mysql php7.0-gd ssmtp sudo mysql-client gosu \
+	&& apt-get install -y php7.0-cli php7.0-fpm php7.0-curl php7.0-mysql php7.0-gd ssmtp sudo mysql-client gosu ${PHP7_EXTRA_PACKAGES} \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& mkdir -p /run/php \
 	&& true
