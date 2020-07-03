@@ -43,7 +43,7 @@ services:
       - nginxproxy-conf:/etc/nginx/conf.d:ro
       - nginxproxy-vhost:/etc/nginx/vhost.d:ro
       - nginxproxy-html:/usr/share/nginx/html
-      - /srv/ssl-certificates:/etc/nginx/certs:ro
+      - ${CERT_PATH:-/srv/ssl-certificates}:/etc/nginx/certs:ro
 
   dockergen:
     build:
@@ -63,7 +63,7 @@ services:
     volumes:
       - nginxproxy-conf:/etc/nginx/conf.d:rw
       - nginxproxy-vhost:/etc/nginx/vhost.d:ro
-      - /srv/ssl-certificates:/etc/nginx/certs:ro
+      - ${CERT_PATH:-/srv/ssl-certificates}:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
   letsencrypt:
@@ -79,5 +79,4 @@ services:
       - nginxproxy-vhost:/etc/nginx/vhost.d:rw
       - nginxproxy-html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /srv/ssl-certificates:/etc/nginx/certs:rw
-
+      - ${CERT_PATH:-/srv/ssl-certificates}:/etc/nginx/certs:rw
