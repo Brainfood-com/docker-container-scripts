@@ -56,6 +56,22 @@ services:
       - /srv/ssl-certificates:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
+  self-signed:
+    depends_on:
+      - nginx
+    image: sebastienheyd/self-signed-proxy-companion
+    networks:
+      default:
+    restart: always
+    environment:
+      - NGINX_PROXY_CONTAINER=nginx
+      - ROOT_CERT=/srv/certs/root.crt
+      - ROOT_KEY=/srv/certs/root.key
+    volumes:
+      - /srv/ssl-certificates:/etc/nginx/certs:rw
+      - /srv/root-ssl-certificates:/srv/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
   letsencrypt:
     environment:
       - DEFAULT_EMAIL
