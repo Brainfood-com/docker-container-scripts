@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+/usr/local/share/container/scripts/adjust-user bind bind /etc/bind /run
+mkdir -p /run/named
+chown bind:bind /run/named
+export CONTAINER_USER=bind CONTAINER_GROUP=bind
+
+exec "$@"

@@ -1,11 +1,12 @@
 ARG WP_CLI_IMAGE=wordpress:cli
+ARG PHP7_EXTRA_PACKAGES
 FROM $WP_CLI_IMAGE as cli
 
 FROM debian:bullseye-20220228-slim
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 RUN apt-get update \
-	&& apt-get install -y php7.4-cli php7.4-fpm php7.4-curl php7.4-mysql php7.4-gd php7.4-xml ssmtp sudo mariadb-client-10.5 gosu ca-certificates \
+	&& apt-get install -y php7.4-cli php7.4-fpm php7.4-curl php7.4-mysql php7.4-gd php7.4-xml ssmtp sudo mariadb-client-10.5 gosu ca-certificates ${PHP7_EXTRA_PACKAGES} \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& mkdir -p /run/php \
 	&& true
@@ -15,7 +16,7 @@ COPY php-cli.ini /etc/php/7.4/cli/conf.d/99-docker.conf
 COPY php-fpm-pool-www.conf /etc/php/7.4/fpm/pool.d/zz-www.conf
 COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
 COPY entrypoint/php /usr/local/share/container/entrypoint/
-COPY bin/container-user bin/local-user bin/wp /usr/local/share/container/bin/
+COPY bin/container-user bin/local-user /usr/local/share/container/bin/
 
 ENV CONTAINER_USER www-data
 ENV CONTAINER_GROUP www-data
