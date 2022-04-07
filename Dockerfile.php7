@@ -2,15 +2,33 @@ ARG WP_CLI_IMAGE=wordpress:cli
 ARG PHP7_EXTRA_PACKAGES
 FROM $WP_CLI_IMAGE as cli
 
-FROM debian:bullseye-20220228-slim
+FROM debian:bullseye-20220228-slim AS php7.4-base
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
+
+FROM php7.4-base AS pear-build
+
 RUN apt-get update \
-	&& apt-get install -y php7.4-cli php7.4-fpm php7.4-curl php7.4-mysql php7.4-gd php7.4-xml ssmtp sudo mariadb-client-10.5 gosu ca-certificates ${PHP7_EXTRA_PACKAGES} \
+	&& apt-get install -y ca-certificates gcc make autoconf libc-dev pkg-config libmcrypt-dev php-pear php-dev \
+	&& pecl channel-update pecl.php.net \
+	&& pecl update-channels \
+	&& pecl install mcrypt \
+	&& true
+
+FROM php7.4-base AS php7.4-runtime
+
+
+RUN apt-get update \
+	&& apt-get install -y php7.4-cli php7.4-fpm php7.4-curl php7.4-mysql php7.4-gd php7.4-xml ssmtp sudo mariadb-client-10.5 libmcrypt4 gosu ca-certificates ${PHP7_EXTRA_PACKAGES} \
 	&& find /var/cache/apt /var/lib/apt -type f -delete \
 	&& mkdir -p /run/php \
 	&& true
 
+COPY --from=pear-build /usr/lib/php/20190902/mcrypt.so /usr/lib/php/20190902/mcrypt.so
+RUN true \
+	&& echo "extension=mcrypt.so" > /etc/php/7.4/cli/conf.d/mcrypt.ini \
+	&& echo "extension=mcrypt.so" > /etc/php/7.4/fpm/conf.d/mcrypt.ini \
+	&& true
 COPY --from=cli /usr/local/bin/wp /usr/local/bin/wp
 COPY php-cli.ini /etc/php/7.4/cli/conf.d/99-docker.conf
 COPY php-fpm-pool-www.conf /etc/php/7.4/fpm/pool.d/zz-www.conf
