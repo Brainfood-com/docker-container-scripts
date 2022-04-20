@@ -1,6 +1,6 @@
 ARG NODE_IMAGE=node:11-stretch
 FROM $NODE_IMAGE
-ARG NPM_VERSION=latest
+ARG NPM_VERSION=latest-7
 ARG NODE_EXTRA_PACKAGES
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
