@@ -33,7 +33,8 @@ services:
       - "443:443"
     restart: always
     volumes:
-      - nginxproxy-conf:/etc/nginx/conf.d:ro
+      - nginxproxy-conf:/etc/nginx/conf.d:rw
+      - ./fix-big-backend-header.conf:/etc/nginx/conf.d/fix-big-backend-header.conf:ro
       - nginxproxy-vhost:/etc/nginx/vhost.d:ro
       - nginxproxy-html:/usr/share/nginx/html
       - /srv/ssl-certificates:/etc/nginx/certs:ro
