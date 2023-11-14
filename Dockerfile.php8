@@ -1,0 +1,44 @@
+ARG WP_CLI_IMAGE=wordpress:cli
+ARG PHP8_EXTRA_PACKAGES
+FROM $WP_CLI_IMAGE as cli
+
+FROM debian:bookworm-20231009-slim AS php8.2-base
+
+COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
+
+FROM php8.2-base AS pear-build
+
+RUN apt-get update \
+	&& apt-get install -y ca-certificates gcc make autoconf libc-dev pkg-config libmcrypt-dev php-pear php-dev \
+	&& pecl channel-update pecl.php.net \
+	&& pecl update-channels \
+	&& pecl install mcrypt \
+	&& true
+
+FROM php8.2-base AS php8.2-runtime
+
+
+RUN apt-get update \
+	&& apt-get install -y php8.2-cli php8.2-fpm php8.2-curl php8.2-mysql php8.2-gd php8.2-xml ssmtp sudo mariadb-client libmcrypt4 gosu ca-certificates ${PHP8_EXTRA_PACKAGES} \
+	&& find /var/cache/apt /var/lib/apt -type f -delete \
+	&& mkdir -p /run/php \
+	&& true
+RUN ls -l /usr/lib/php
+COPY --from=pear-build /usr/lib/php/20220829/mcrypt.so /usr/lib/php/20220829/mcrypt.so
+RUN true \
+	&& echo "extension=mcrypt.so" > /etc/php/8.2/cli/conf.d/mcrypt.ini \
+	&& echo "extension=mcrypt.so" > /etc/php/8.2/fpm/conf.d/mcrypt.ini \
+	&& true
+COPY --from=cli /usr/local/bin/wp /usr/local/bin/wp
+COPY php-cli.ini /etc/php/8.2/cli/conf.d/99-docker.conf
+COPY php-fpm-pool-www.conf /etc/php/8.2/fpm/pool.d/zz-www.conf
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY entrypoint/php /usr/local/share/container/entrypoint/
+COPY bin/container-user bin/local-user /usr/local/share/container/bin/
+
+ENV CONTAINER_USER www-data
+ENV CONTAINER_GROUP www-data
+
+EXPOSE 9000
+ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint"]
+CMD ["/usr/sbin/php-fpm8.2", "-F"]
