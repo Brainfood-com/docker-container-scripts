@@ -2,7 +2,7 @@ ARG WP_CLI_IMAGE=wordpress:cli
 ARG PHP8_EXTRA_PACKAGES
 FROM $WP_CLI_IMAGE as cli
 
-FROM debian:bookworm-20231009-slim AS php8.2-base
+FROM debian:bookworm-20240513-slim AS php8.2-base
 
 COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
 

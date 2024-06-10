@@ -1,13 +1,11 @@
-FROM debian:stretch-slim
+FROM debian:bookworm-20240513-slim
 
 ARG NGINX_UPGRADE
 
 EXPOSE 80 443
 
-COPY etc/apt/sources.list.d/stretch-backports.list etc/apt/sources.list.d/stretch-backports.list
-
 RUN apt-get update \
-	&& apt-get install -t stretch-backports -y nginx libnginx-mod-http-lua \
+	&& apt-get install -y nginx libnginx-mod-http-lua libnginx-mod-http-subs-filter \
 	&& ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log \
 	&& rm /etc/nginx/sites-enabled/default \
