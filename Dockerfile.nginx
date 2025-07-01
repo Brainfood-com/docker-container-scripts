@@ -1,4 +1,4 @@
-FROM debian:bookworm-20240513-slim
+FROM debian:bookworm-20250610-slim
 
 ARG NGINX_UPGRADE
 

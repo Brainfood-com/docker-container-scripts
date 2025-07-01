@@ -1,0 +1,20 @@
+FROM mariadb:11.8
+
+COPY etc/apt/apt.conf.d/no-install-suggests-recommends.apt.conf /etc/apt/apt.conf.d/
+RUN true \
+	&& apt-get update \
+	&& apt-get install -y mariadb-server mariadb-client rsyslog mycli mydumper less \
+	&& find /var/lib/apt/lists /var/cache/apt/archives -type f -delete \
+	&& true
+
+COPY etc/rsyslog.d/stderr.conf /etc/rsyslog.d/
+COPY scripts/adjust-user scripts/adjust-term scripts/entrypoint scripts/exec /usr/local/share/container/scripts/
+COPY bin/container-user bin/local-user bin/mysql bin/mysqldump bin/mycli bin/myloader /usr/local/share/container/bin/
+COPY etc/mysql/mariadb.conf.d/99-docker.cnf /etc/mysql/conf.d/99-docker.cnf
+ENV LANG C.UTF-8
+ENV CONTAINER_USER mysql
+ENV CONTAINER_GROUP mysql
+
+EXPOSE 3306
+ENTRYPOINT ["/usr/local/share/container/scripts/entrypoint", "/usr/local/bin/docker-entrypoint.sh"]
+CMD ["mariadbd"]
